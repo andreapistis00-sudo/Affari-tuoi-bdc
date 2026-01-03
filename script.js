@@ -4,6 +4,8 @@
 const params = new URLSearchParams(window.location.search);
 const MODE = (params.get("mode") || "game").toLowerCase(); // "game" | "screen"
 console.log("MODE:", MODE);
+document.body.dataset.mode = MODE;
+
 
 // =======================
 // CONFIG
