@@ -4,6 +4,27 @@
 const params = new URLSearchParams(window.location.search);
 const MODE = (params.get("mode") || "game").toLowerCase(); // "game" | "screen"
 console.log("MODE:", MODE);
+// =======================
+// FIREBASE INIT
+// =======================
+
+const firebaseConfig = {
+    apiKey: "AIzaSyDc_SVC5FFyMf6fZeN0Be_kIAWWWBj8tYg",
+    authDomain: "affari-tuoi-1b994.firebaseapp.com",
+    projectId: "affari-tuoi-1b994",
+    storageBucket: "affari-tuoi-1b994.firebasestorage.app",
+    messagingSenderId: "639378779280",
+    appId: "1:639378779280:web:dc550dd56b529bdfb93c15",
+    measurementId: "G-JP7JTV9NTF"
+};
+
+// Init Firebase
+firebase.initializeApp(firebaseConfig);
+
+// Init Firestore
+const db = firebase.firestore();
+
+console.log("🔥 Firebase inizializzato", db);
 
 // attiva la modalità anche per il CSS (sicuro dopo caricamento DOM)
 document.addEventListener("DOMContentLoaded", () => {
