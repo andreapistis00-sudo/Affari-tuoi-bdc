@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Affari Tuoi - TV</title>
+  <style>
+    body { font-family: system-ui, Arial; margin: 0; padding: 24px; }
+    h1 { margin: 0 0 16px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+    .card { border: 1px solid #ddd; border-radius: 12px; padding: 16px; }
+    .name { font-size: 20px; margin: 0 0 8px; }
+    .jackpot { font-size: 36px; font-weight: 800; margin: 0; }
+    .muted { color: #666; font-size: 14px; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <h1>Situazione Montepremi (Live)</h1>
+  <div id="grid" class="grid"></div>
+
+  <script type="module">
+    // Firebase (modular SDK)
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+    import { getFirestore, collection, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+    // 1) INCOLLA QUI la tua firebaseConfig (vedi istruzioni sotto)
+    const firebaseConfig = {
+      // apiKey: "...",
+      // authDomain: "...",
+      // projectId: "...",
+      // ...
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const grid = document.getElementById("grid");
+
+    // legge tutte le partite attive e aggiorna la TV in tempo reale
+    const q = query(collection(db, "rooms"), where("status", "==", "active"));
+
+    onSnapshot(q, (snapshot) => {
+      grid.innerHTML = "";
+
+      if (snapshot.empty) {
+        grid.innerHTML = `<div class="muted">Nessuna partita attiva.</div>`;
+        return;
+      }
+
+      snapshot.forEach((doc) => {
+        const data = doc.data();
+
+        const tableName = data.tableName ?? doc.id;
+        const jackpot = (typeof data.jackpot === "number") ? data.jackpot : 0;
+
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `
+          <p class="name">${tableName}</p>
+          <p class="jackpot">${jackpot}</p>
+          <div class="muted">id: ${doc.id}</div>
+        `;
+        grid.appendChild(card);
+      });
+    }, (err) => {
+      grid.innerHTML = `<div class="muted">Errore Firestore: ${err.message}</div>`;
+      console.error(err);
+    });
+  </script>
+</body>
+</html>
