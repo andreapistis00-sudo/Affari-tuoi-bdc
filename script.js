@@ -4,14 +4,6 @@
 const params = new URLSearchParams(window.location.search);
 const MODE = (params.get("mode") || "game").toLowerCase(); // "game" | "screen"
 console.log("MODE:", MODE);
-
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
   apiKey: "AIzaSyDc_SVC5FFyMf6fZeN0Be_kIAWWWBj8tYg",
@@ -23,9 +15,6 @@ const firebaseConfig = {
   measurementId: "G-JP7JTV9NTF"
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
 
 // Init Firestore
 const db = firebase.firestore();
