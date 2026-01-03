@@ -282,3 +282,30 @@ body{
   .caseGrid, .swapGrid{ grid-template-columns: repeat(2, minmax(120px, 1fr)); }
   .title h1{ font-size:26px; }
 }
+/* ============================
+   MODE SCREEN (solo premi)
+   ============================ */
+body[data-mode="screen"] .panel.board,
+body[data-mode="screen"] .panel.offer,
+body[data-mode="screen"] .actions,
+body[data-mode="screen"] .modal {
+  display: none !important;
+}
+
+body[data-mode="screen"] .layout {
+  grid-template-columns: 1fr;
+}
+
+body[data-mode="screen"] .panel.prizes {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+body[data-mode="screen"] .topbar {
+  justify-content: center;
+  text-align: center;
+}
+
+body[data-mode="screen"] .status {
+  display: none;
+}
