@@ -1,490 +1,523 @@
-// =======================
-// MODALITÀ: game / screen
-// =======================
-const params = new URLSearchParams(window.location.search);
-const MODE = (params.get("mode") || "game").toLowerCase(); // "game" | "screen"
-console.log("MODE:", MODE);
-
-// attiva la modalità anche per il CSS (sicuro dopo caricamento DOM)
 document.addEventListener("DOMContentLoaded", () => {
-  document.body.setAttribute("data-mode", MODE);
-});
+  const CONFIG = {
+    title: "IL GIOCO DEI PACCHI",
+    subtitle: "Scegli una località e prova a portarti a casa il premio migliore!",
+    bankerName: "Il Banco",
+    currency: "punti",
 
-// =======================
-// FIREBASE (compat) - INIT
-// =======================
-// Usa gli script in index.html:
-// firebase-app-compat.js + firebase-firestore-compat.js
+    casesCount: 20,
 
-const firebaseConfig = {
-  apiKey: "AIzaSyDc_SVC5FFyMf6fZeN0Be_kIAWWWBj8tYg",
-  authDomain: "affari-tuoi-1b994.firebaseapp.com",
-  projectId: "affari-tuoi-1b994",
-  storageBucket: "affari-tuoi-1b994.firebasestorage.app",
-  messagingSenderId: "639378779280",
-  appId: "1:639378779280:web:dc550dd56b529bdfb93c15",
-  measurementId: "G-JP7JTV9NTF"
-};
+    caseNames: [
+      "Girilonga","Coroddis","Su tauli","Corosa","Gennaguara",
+      "Maricoxina","Niu Susu","Funtanedda De basciu","Barigau","Niu Sciossu",
+      "Su fossu e Bobboi","S'arcu e susu","Mattemola","Pissu e cuccu","Tucci",
+      "Costa e coccu","Santa Luscia","Mesu idda","Sa Cranniga","Bosco selene"
+    ],
 
-// ✅ MANCAVA QUESTO: inizializza Firebase
-firebase.initializeApp(firebaseConfig);
+    prizeLabels: [
+      "Premio 1","Premio 2","Premio 3","Premio 4","Premio 5",
+      "Premio 6","Premio 7","Premio 8","Premio 9","Premio 10",
+      "Premio 11","Premio 12","Premio 13","Premio 14","Premio 15",
+      "Premio 16","Premio 17","Premio 18","Premio 19","Premio 20"
+    ],
 
-// Init Firestore
-const db = firebase.firestore();
+    // valori interni solo per calcolare l’offerta (non mostrati)
+    prizeValues: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20],
 
-console.log("✅ Firebase collegato:", firebase.app().options.projectId);
-console.log("🔥 Firestore pronto:", db);
+    // ✅ MOMENTI SCELTI DA TE
+    offerMoments: [5, 15],       // 1ª e 2ª offerta
+    swapMoments: [10],           // 1° cambio
+    finalSwapAtTwoLeft: true,    // 2° cambio quando restano 2 pacchi
 
-// =======================
-// CONFIG
-// =======================
-const LOCALITIES = [
-  "Girilonga","Coroddis","Su tauli","Corosa","Gennaguara","Maricoxina","Niu Susu","Funtanedda De basciu",
-  "Barigau","Niu Sciossu","Su fossu e Bobboi","S'arcu e susu","Mattemola","Pissu e cuccu","Tucci","Costa e coccu",
-  "Santa Luscia","Mesu idda","Sa Cranniga","Bosco selene"
-];
+    // moltiplicatori per 1ª e 2ª offerta (puoi ritoccarli)
+    offerMultipliers: [0.62, 0.82],
 
-// tier: LOW 1-10, MID 11-13, HIGH 14-20
-function tierForPrizeIndex(i1to20){
-  if (i1to20 <= 10) return "LOW";
-  if (i1to20 <= 13) return "MID";
-  return "HIGH";
-}
-const TIER_VALUE = { LOW: 10, MID: 50, HIGH: 150 };
-
-const OFFER_MOMENTS = [5, 15];
-const SWAP_MOMENT = 10; // primo cambio dopo 10 pacchi
-// secondo cambio quando restano gli ultimi 2 pacchi (gestito a parte)
-
-// =======================
-// STATE
-// =======================
-let state = null;
-
-// =======================
-// DOM
-// =======================
-const ui = {
-  openedLabel: document.getElementById("openedLabel"),
-  myCaseLabel: document.getElementById("myCaseLabel"),
-  hintText: document.getElementById("hintText"),
-
-  prizeGrid: document.getElementById("prizeGrid"),
-  caseGrid: document.getElementById("caseGrid"),
-
-  btnNew: document.getElementById("btnNew"),
-  btnSwap: document.getElementById("btnSwap"),
-
-  offerValue: document.getElementById("offerValue"),
-  casesLeft: document.getElementById("casesLeft"),
-
-  resultBox: document.getElementById("resultBox"),
-  resultTitle: document.getElementById("resultTitle"),
-  resultText: document.getElementById("resultText"),
-
-  // modals
-  pickModal: document.getElementById("pickModal"),
-  pickGrid: document.getElementById("pickGrid"),
-  pickClose: document.getElementById("pickClose"),
-  pickRandom: document.getElementById("pickRandom"),
-
-  revealModal: document.getElementById("revealModal"),
-  revealClose: document.getElementById("revealClose"),
-  revealOk: document.getElementById("revealOk"),
-  revealPlace: document.getElementById("revealPlace"),
-  revealPrize: document.getElementById("revealPrize"),
-  revealSub: document.getElementById("revealSub"),
-
-  offerModal: document.getElementById("offerModal"),
-  offerClose: document.getElementById("offerClose"),
-  offerModalValue: document.getElementById("offerModalValue"),
-  offerAccept: document.getElementById("offerAccept"),
-  offerReject: document.getElementById("offerReject"),
-
-  swapModal: document.getElementById("swapModal"),
-  swapClose: document.getElementById("swapClose"),
-  swapMyCase: document.getElementById("swapMyCase"),
-  swapGrid: document.getElementById("swapGrid"),
-  swapSkip: document.getElementById("swapSkip"),
-};
-
-// =======================
-// HELPERS
-// =======================
-function shuffle(arr){
-  const a = arr.slice();
-  for(let i=a.length-1;i>0;i--){
-    const j = Math.floor(Math.random()*(i+1));
-    [a[i],a[j]] = [a[j],a[i]];
-  }
-  return a;
-}
-function openModal(el){
-  el.hidden = false;
-}
-function closeModal(el){
-  el.hidden = true;
-}
-function remainingUnopenedCases(){
-  return state.cases.filter(c => !c.opened);
-}
-function remainingPlayableCases(){
-  // casi cliccabili: non aperti e non il mio pacco
-  return state.cases.filter(c => !c.opened && c.id !== state.myCaseId);
-}
-function getCaseName(caseId){
-  const c = state.cases.find(x => x.id === caseId);
-  return c ? c.name : "—";
-}
-function prizeBadgeClass(tier){
-  return tier === "LOW" ? "low" : tier === "MID" ? "mid" : "high";
-}
-
-// =======================
-// NEW GAME
-// =======================
-function newGame(){
-  const prizes = Array.from({length:20}, (_,i)=>{
-    const idx = i+1;
-    const tier = tierForPrizeIndex(idx);
-    return {
-      label: `Premio ${idx}`,
-      tier,
-      value: TIER_VALUE[tier],
-      out: false
-    };
-  });
-
-  const shuffledPrizes = shuffle(prizes.map((p, i) => ({...p, _pi:i})));
-  const cases = LOCALITIES.map((name, i)=>({
-    id: i+1,
-    name,
-    opened:false,
-    prize: shuffledPrizes[i] // oggetto premio assegnato
-  }));
-
-  state = {
-    status: "picking",       // picking | playing | ended
-    myCaseId: null,
-    openedCount: 0,
-    lastOffer: null,
-    offersDone: new Set(),
-    firstSwapDone: false,
-    finalSwapDone: false,
-    cases
+    maxSwaps: 2
   };
 
-  ui.resultBox.hidden = true;
-  ui.offerValue.textContent = "—";
-  renderAll();
-  showPickModalMandatory();
-}
+  let state = null;
+  const $ = (id) => document.getElementById(id);
 
-function renderAll(){
-  // header
-  ui.openedLabel.textContent = String(state.openedCount);
-  ui.myCaseLabel.textContent = state.myCaseId ? getCaseName(state.myCaseId) : "—";
+  const ui = {
+    title: $("gameTitle"),
+    subtitle: $("subtitle"),
+    bankerName: $("bankerName"),
+    bankerLine: $("bankerLine"),
 
-  const left = remainingUnopenedCases().length;
-  ui.casesLeft.textContent = String(left);
+    prizeGrid: $("prizeGrid"),
+    caseGrid: $("caseGrid"),
 
-  // hint
-  if (!state.myCaseId) {
-    ui.hintText.textContent = "Scegli la tua località (il tuo pacco).";
-  } else if (state.status === "ended") {
-    ui.hintText.textContent = "Partita terminata.";
-  } else {
-    ui.hintText.textContent = "Apri le località (non il tuo pacco).";
+    openedLabel: $("openedLabel"),
+    myCaseLabel: $("myCaseLabel"),
+    hintText: $("hintText"),
+
+    btnNew: $("btnNew"),
+    btnSwap: $("btnSwap"),
+    btnOffer: $("btnOffer"),
+    btnDeal: $("btnDeal"),
+    btnNoDeal: $("btnNoDeal"),
+
+    offerValue: $("offerValue"),
+    casesLeft: $("casesLeft"),
+
+    resultBox: $("resultBox"),
+    resultTitle: $("resultTitle"),
+    resultText: $("resultText"),
+
+    // pick
+    pickModal: $("pickModal"),
+    pickGrid: $("pickGrid"),
+    pickClose: $("pickClose"),
+    pickRandom: $("pickRandom"),
+
+    // reveal
+    revealModal: $("revealModal"),
+    revealPlace: $("revealPlace"),
+    revealPrize: $("revealPrize"),
+    revealSub: $("revealSub"),
+    revealOk: $("revealOk"),
+    revealClose: $("revealClose"),
+
+    // offer modal
+    offerModal: $("offerModal"),
+    offerModalValue: $("offerModalValue"),
+    offerModalSub: $("offerModalSub"),
+    offerAccept: $("offerAccept"),
+    offerReject: $("offerReject"),
+    offerClose: $("offerClose"),
+
+    // swap
+    swapModal: $("swapModal"),
+    swapGrid: $("swapGrid"),
+    swapMyCase: $("swapMyCase"),
+    swapSub: $("swapSub"),
+    swapSkip: $("swapSkip"),
+    swapClose: $("swapClose")
+  };
+
+  /* ===== UTIL ===== */
+  function shuffle(arr){
+    const a = [...arr];
+    for (let i=a.length-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
   }
 
-  renderPrizeGrid();
-  renderCaseGrid();
-}
+  function getCaseName(id){ return CONFIG.caseNames[id-1] || `Località ${id}`; }
 
-function renderPrizeGrid(){
-  const allPrizes = [];
-  const seen = new Set();
-  for (const c of state.cases){
-    const key = c.prize.label;
-    if (!seen.has(key)){
-      seen.add(key);
-      allPrizes.push(c.prize);
+  function formatPoints(v){
+    if (v == null) return "—";
+    return `${Math.round(v).toLocaleString("it-IT")} ${CONFIG.currency}`;
+  }
+
+  function remainingCases(){ return state.cases.filter(c => !c.opened); }
+  function remainingCaseIds(){ return remainingCases().map(c => c.id); }
+
+  function computeEV(){
+    const vals = remainingCases().map(c => c.prizeValue);
+    const sum = vals.reduce((s,v)=>s+v,0);
+    return vals.length ? sum/vals.length : 0;
+  }
+
+  function setHint(t){ ui.hintText.textContent=t; }
+  function setBankerLine(t){ ui.bankerLine.textContent=t; }
+  function renderOffer(v){ ui.offerValue.textContent=formatPoints(v); }
+
+  /* ===== MODAL BASE ===== */
+  function openModal(modalEl){
+    modalEl.hidden = false;
+    document.body.classList.add("modal-open");
+  }
+  function closeModal(modalEl){
+    modalEl.hidden = true;
+    const anyOpen =
+      !ui.pickModal.hidden ||
+      !ui.revealModal.hidden ||
+      !ui.offerModal.hidden ||
+      !ui.swapModal.hidden;
+    if(!anyOpen) document.body.classList.remove("modal-open");
+  }
+  function isAnyModalOpen(){
+    return (
+      !ui.pickModal.hidden ||
+      !ui.revealModal.hidden ||
+      !ui.offerModal.hidden ||
+      !ui.swapModal.hidden
+    );
+  }
+
+  /* ===== RENDER ===== */
+  function prizeTierByValue(v){
+    const sorted=[...CONFIG.prizeValues].sort((a,b)=>a-b);
+    const p33=sorted[Math.floor(sorted.length*0.33)];
+    const p66=sorted[Math.floor(sorted.length*0.66)];
+    if(v<=p33) return "low";
+    if(v>=p66) return "high";
+    return "mid";
+  }
+
+  function renderPrizes(){
+    ui.prizeGrid.innerHTML="";
+    state.allPrizes.forEach(p=>{
+      const item=document.createElement("div");
+      const isOut=state.removedPrizeIds.has(p.id);
+      item.className=`prizeItem ${isOut ? "out":""}`;
+
+      const left=document.createElement("div");
+      left.textContent=p.label;
+
+      const tag=document.createElement("div");
+      const tier=prizeTierByValue(p.value);
+      tag.className=`tag ${tier}`;
+      tag.textContent=tier.toUpperCase();
+
+      item.appendChild(left);
+      item.appendChild(tag);
+      ui.prizeGrid.appendChild(item);
+    });
+  }
+
+  function renderCases(){
+    ui.caseGrid.innerHTML="";
+    state.cases.forEach(c=>{
+      const btn=document.createElement("button");
+      btn.className="caseBtn";
+      if(c.id===state.myCaseId) btn.classList.add("mine");
+      if(c.opened) btn.classList.add("opened");
+
+      btn.innerHTML = `
+        <div class="num">${getCaseName(c.id)}</div>
+        <span class="small">${c.opened ? "—" : "clicca"}</span>
+      `;
+
+      btn.addEventListener("click", ()=>onCaseClick(c.id));
+      ui.caseGrid.appendChild(btn);
+    });
+  }
+
+  function renderTop(){
+    ui.title.textContent=CONFIG.title;
+    ui.subtitle.textContent=CONFIG.subtitle;
+    ui.bankerName.textContent=CONFIG.bankerName;
+
+    ui.openedLabel.textContent = String(state.openedCount);
+    ui.myCaseLabel.textContent = state.myCaseId ? getCaseName(state.myCaseId) : "—";
+    ui.casesLeft.textContent = String(remainingCaseIds().length);
+
+    // bottoni “vecchi” non usati
+    ui.btnOffer.disabled = true;
+    ui.btnDeal.disabled = true;
+    ui.btnNoDeal.disabled = true;
+
+    ui.btnSwap.disabled = true; // swap obbligatorio via modal quando scatta
+  }
+
+  function renderAll(){
+    renderTop();
+    renderPrizes();
+    renderCases();
+  }
+
+  /* ===== MODAL: PICK (obbligatorio) ===== */
+  function showPickModal(){
+    ui.pickGrid.innerHTML = "";
+    state.cases.slice().sort((a,b)=>a.id-b.id).forEach(c=>{
+      const b = document.createElement("button");
+      b.className = "swapBtn";
+      b.innerHTML = `<strong>${getCaseName(c.id)}</strong><span>scegli come tuo pacco</span>`;
+      b.addEventListener("click", () => pickMyCase(c.id));
+      ui.pickGrid.appendChild(b);
+    });
+    openModal(ui.pickModal);
+  }
+
+  function pickMyCase(id){
+    state.myCaseId = id;
+    closeModal(ui.pickModal);
+    setBankerLine("Perfetto. Inizia ad aprire le località!");
+    setHint("Apri una località.");
+    renderAll();
+  }
+
+  ui.pickClose.addEventListener("click", () => setHint("Devi scegliere una località per iniziare."));
+  ui.pickModal.addEventListener("click", (e)=>{ if(e.target===ui.pickModal) setHint("Devi scegliere una località per iniziare."); });
+  ui.pickRandom.addEventListener("click", ()=>{
+    const ids = state.cases.map(c=>c.id);
+    pickMyCase(ids[Math.floor(Math.random()*ids.length)]);
+  });
+
+  /* ===== MODAL: REVEAL ===== */
+  function showRevealModal(placeName, prizeLabel, subText){
+    ui.revealPlace.textContent = placeName;
+    ui.revealPrize.textContent = prizeLabel;
+    ui.revealSub.textContent = subText || "Continua a giocare.";
+    openModal(ui.revealModal);
+  }
+  function hideRevealModal(){
+    closeModal(ui.revealModal);
+
+    // se c’era un’azione obbligatoria “in coda”, la eseguo ora
+    if(state.nextForced){
+      const next = state.nextForced;
+      state.nextForced = null;
+      if(next.type === "offer") showOfferModalMandatory(next.offer);
+      if(next.type === "swap") showSwapModalMandatory();
     }
   }
-  allPrizes.sort((a,b)=>{
-    const na = parseInt(a.label.replace(/\D/g,""),10);
-    const nb = parseInt(b.label.replace(/\D/g,""),10);
-    return na-nb;
-  });
 
-  ui.prizeGrid.innerHTML = "";
-  allPrizes.forEach(p=>{
-    const row = document.createElement("div");
-    row.className = "prizeItem" + (p.out ? " out" : "");
-    const left = document.createElement("div");
-    left.textContent = p.label;
-    const badge = document.createElement("span");
-    badge.className = `badge ${prizeBadgeClass(p.tier)}`;
-    badge.textContent = p.tier;
-    row.appendChild(left);
-    row.appendChild(badge);
-    ui.prizeGrid.appendChild(row);
-  });
-}
+  ui.revealOk.addEventListener("click", hideRevealModal);
+  ui.revealClose.addEventListener("click", hideRevealModal);
+  ui.revealModal.addEventListener("click", (e)=>{ if(e.target===ui.revealModal) hideRevealModal(); });
 
-function renderCaseGrid(){
-  ui.caseGrid.innerHTML = "";
-  state.cases.forEach(c=>{
-    const btn = document.createElement("button");
-    btn.className = "caseBtn" +
-      (c.opened ? " opened" : "") +
-      (state.myCaseId === c.id ? " mine" : "");
+  /* ===== MODAL: SWAP (obbligatorio) ===== */
+  function showSwapModalMandatory(){
+    if(state.swapsLeft <= 0) return;
 
-    btn.disabled = c.opened || (state.status !== "playing") || (c.id === state.myCaseId);
-    btn.textContent = c.name;
+    ui.swapGrid.innerHTML = "";
+    ui.swapMyCase.textContent = `Il tuo pacco: ${getCaseName(state.myCaseId)} (cambi rimasti: ${state.swapsLeft})`;
 
-    if (MODE === "game") {
-      btn.addEventListener("click", ()=> onCaseClick(c.id));
-    }
+    const choices = state.cases
+      .filter(c => !c.opened && c.id !== state.myCaseId)
+      .sort((a,b)=>a.id-b.id);
 
-    ui.caseGrid.appendChild(btn);
-  });
-}
-
-// =======================
-// PICK MODAL
-// =======================
-function showPickModalMandatory(){
-  if (MODE !== "game") return;
-
-  ui.pickGrid.innerHTML = "";
-  state.cases.forEach(c=>{
-    const btn = document.createElement("button");
-    btn.className = "caseBtn";
-    btn.textContent = c.name;
-
-    btn.addEventListener("click", ()=>{
-      pickMyCase(c.id);
+    choices.forEach(c=>{
+      const btn = document.createElement("button");
+      btn.className = "swapBtn";
+      btn.innerHTML = `<strong>${getCaseName(c.id)}</strong><span>clicca per scambiare</span>`;
+      btn.addEventListener("click", () => doSwap(c.id));
+      ui.swapGrid.appendChild(btn);
     });
 
-    ui.pickGrid.appendChild(btn);
+    openModal(ui.swapModal);
+  }
+
+  function doSwap(newId){
+    const oldId = state.myCaseId;
+    state.myCaseId = newId;
+    state.swapsLeft -= 1;
+
+    closeModal(ui.swapModal);
+    setBankerLine("Cambio pacco effettuato!");
+    setHint(`Scambio: ${getCaseName(oldId)} → ${getCaseName(newId)}. Ora continua ad aprire.`);
+    renderAll();
+  }
+
+  function skipSwap(){
+    closeModal(ui.swapModal);
+    setBankerLine("Nessun cambio.");
+    setHint("Continua ad aprire le località.");
+    renderAll();
+  }
+
+  ui.swapSkip.addEventListener("click", skipSwap);
+  ui.swapClose.addEventListener("click", skipSwap);
+  ui.swapModal.addEventListener("click", (e)=>{ if(e.target===ui.swapModal) {/* blocco */} });
+
+  /* ===== MODAL: OFFERTA (obbligatorio) ===== */
+  function showOfferModalMandatory(offer){
+    ui.offerModalValue.textContent = formatPoints(offer);
+    ui.offerModalSub.textContent = "Devi scegliere: accetta o rifiuta.";
+    openModal(ui.offerModal);
+  }
+
+  function acceptOffer(){
+    closeModal(ui.offerModal);
+
+    // fine partita (semplice): mostra cosa c'era nel tuo pacco
+    const my = state.cases.find(c=>c.id===state.myCaseId);
+    setBankerLine("Offerta accettata!");
+    setHint("Partita finita.");
+
+    $("resultBox").hidden = false;
+    $("resultTitle").textContent = "OFFERTA ACCETTATA!";
+    $("resultText").textContent =
+      `Hai accettato: ${formatPoints(state.lastOffer)}.\n`+
+      `Nel tuo pacco (${getCaseName(state.myCaseId)}) c’era: ${my.prizeLabel}.`;
+
+    state.phase = "ended";
+    renderAll();
+  }
+
+  function rejectOffer(){
+    closeModal(ui.offerModal);
+    setBankerLine("Offerta rifiutata!");
+    setHint("Continua ad aprire le località.");
+    renderAll();
+  }
+
+  ui.offerAccept.addEventListener("click", acceptOffer);
+  ui.offerReject.addEventListener("click", rejectOffer);
+  ui.offerClose.addEventListener("click", () => setHint("Devi scegliere: ACCETTA o RIFIUTA l’offerta."));
+  ui.offerModal.addEventListener("click", (e)=>{ if(e.target===ui.offerModal) setHint("Devi scegliere: ACCETTA o RIFIUTA l’offerta."); });
+
+  document.addEventListener("keydown", (e)=>{
+    if(e.key !== "Escape") return;
+    if(!ui.revealModal.hidden) hideRevealModal();
   });
 
-  openModal(ui.pickModal);
-}
+  /* ===== LOGICA: OFFERTA ===== */
+  function computeOffer(){
+    const ev = computeEV();
+    const idx = Math.min(state.offersMade, CONFIG.offerMultipliers.length - 1);
+    const mult = CONFIG.offerMultipliers[idx];
+    const jitter = 0.92 + Math.random()*0.16;
+    return Math.round(ev * mult * jitter);
+  }
 
-function pickMyCase(caseId){
-  state.myCaseId = caseId;
-  state.status = "playing";
-  closeModal(ui.pickModal);
-  renderAll();
-}
+  function queueOffer(){
+    const offer = computeOffer();
+    state.lastOffer = offer;
+    state.offersMade += 1;
+    state.offerDone.add(state.openedCount);
 
-// =======================
-// OPEN CASE
-// =======================
-function onCaseClick(caseId){
-  if (MODE !== "game") return;
-
-  if (state.status !== "playing") return;
-  if (!state.myCaseId) return;
-
-  const c = state.cases.find(x=>x.id===caseId);
-  if (!c || c.opened) return;
-  if (caseId === state.myCaseId) return;
-
-  c.opened = true;
-  c.prize.out = true;
-  state.openedCount++;
-
-  renderAll();
-  showRevealModal(c.name, c.prize.label);
-}
-
-// =======================
-// REVEAL MODAL
-// =======================
-function showRevealModal(place, prizeLabel){
-  ui.revealPlace.textContent = place;
-  ui.revealPrize.textContent = prizeLabel;
-  ui.revealSub.textContent = "Continua ad aprire le località.";
-  openModal(ui.revealModal);
-}
-
-// =======================
-// OFFER / SWAP LOGIC
-// =======================
-function computeOffer(){
-  const remainingPrizes = [];
-  const seen = new Set();
-  for(const c of state.cases){
-    const p = c.prize;
-    if (!p.out && !seen.has(p.label)){
-      seen.add(p.label);
-      remainingPrizes.push(p.value);
+    // se c’è un reveal aperto, metto “in coda”
+    if(!ui.revealModal.hidden){
+      state.nextForced = { type: "offer", offer };
+    } else {
+      showOfferModalMandatory(offer);
     }
+
+    renderOffer(offer);
+    setBankerLine("Il Banco ha fatto un’offerta!");
   }
-  const sum = remainingPrizes.reduce((s,v)=>s+v,0);
-  const ev = remainingPrizes.length ? sum/remainingPrizes.length : 0;
 
-  const made = state.offersDone.size;
-  const mult = made === 0 ? 0.62 : 0.82;
-  const jitter = 0.92 + Math.random()*0.16;
-  return Math.round(ev * mult * jitter);
-}
+  function queueSwap(kindKey){
+    if(state.swapsLeft <= 0) return;
 
-function shouldTriggerOffer(){
-  return OFFER_MOMENTS.includes(state.openedCount) && !state.offersDone.has(state.openedCount);
-}
-function shouldTriggerFirstSwap(){
-  return state.openedCount >= SWAP_MOMENT && !state.firstSwapDone;
-}
-function shouldTriggerFinalSwap(){
-  const unopened = remainingUnopenedCases().length;
-  return unopened === 2 && !state.finalSwapDone && state.status === "playing";
-}
+    if(kindKey === "opened10") state.swapDone.add(10);
+    if(kindKey === "final2") state.finalSwapDone = true;
 
-function queueMoments(){
-  if (state.status !== "playing") return;
+    // se c’è reveal aperto, metto in coda
+    if(!ui.revealModal.hidden){
+      state.nextForced = { type: "swap" };
+    } else {
+      showSwapModalMandatory();
+    }
 
-  if (shouldTriggerOffer()){
-    showOfferModalMandatory();
-    return;
+    setBankerLine("Momento CAMBIO PACCO!");
   }
-  if (shouldTriggerFirstSwap()){
-    showSwapModalMandatory(false);
-    return;
-  }
-  if (shouldTriggerFinalSwap()){
-    showSwapModalMandatory(true);
-    return;
-  }
-}
 
-// OFFER MODAL
-function showOfferModalMandatory(){
-  state.offersDone.add(state.openedCount);
+  /* ===== CLICK PACCHI ===== */
+  function onCaseClick(id){
+    if(state.phase === "ended") return;
+    if(isAnyModalOpen()) return;
 
-  const offer = computeOffer();
-  state.lastOffer = offer;
+    const c = state.cases.find(x=>x.id===id);
+    if(!c || c.opened) return;
 
-  ui.offerValue.textContent = String(offer);
-  ui.offerModalValue.textContent = String(offer);
-
-  ui.offerClose.disabled = true;
-  ui.offerClose.style.opacity = "0.4";
-  ui.offerClose.style.pointerEvents = "none";
-
-  openModal(ui.offerModal);
-}
-
-function acceptOffer(){
-  const offer = state.lastOffer ?? 0;
-  state.status = "ended";
-
-  ui.resultBox.hidden = false;
-  ui.resultTitle.textContent = "Hai accettato l’offerta!";
-  ui.resultText.textContent = `Hai chiuso la partita con l’offerta del Banco: ${offer}.`;
-
-  closeModal(ui.offerModal);
-  renderAll();
-}
-
-function rejectOffer(){
-  closeModal(ui.offerModal);
-  renderAll();
-  // dopo il rifiuto controlla se serve subito un cambio
-  queueMoments();
-}
-
-// SWAP MODAL
-function showSwapModalMandatory(isFinal){
-  if (isFinal) state.finalSwapDone = true;
-  else state.firstSwapDone = true;
-
-  ui.swapMyCase.textContent = `Il tuo pacco: ${getCaseName(state.myCaseId)}`;
-  ui.swapSub.textContent = isFinal
-    ? "Ultimo scambio: scegli il pacco con cui scambiare oppure continua senza cambiare."
-    : "Momento cambio: scegli il pacco con cui scambiare oppure continua senza cambiare.";
-
-  ui.swapClose.disabled = true;
-  ui.swapClose.style.opacity = "0.4";
-  ui.swapClose.style.pointerEvents = "none";
-
-  ui.swapGrid.innerHTML = "";
-  remainingPlayableCases().forEach(c=>{
-    const btn = document.createElement("button");
-    btn.className = "caseBtn";
-    btn.textContent = c.name;
-
-    btn.addEventListener("click", ()=>{
-      doSwapWith(c.id);
-    });
-
-    ui.swapGrid.appendChild(btn);
-  });
-
-  openModal(ui.swapModal);
-}
-
-function doSwapWith(otherId){
-  const my = state.cases.find(x=>x.id===state.myCaseId);
-  const other = state.cases.find(x=>x.id===otherId);
-  if (!my || !other || other.opened) return;
-
-  const tmpPrize = my.prize;
-  my.prize = other.prize;
-  other.prize = tmpPrize;
-
-  closeModal(ui.swapModal);
-  renderAll();
-}
-
-function skipSwap(){
-  closeModal(ui.swapModal);
-  renderAll();
-}
-
-// =======================
-// EVENTS
-// =======================
-function bindEvents(){
-  if (MODE === "game") {
-    ui.btnNew.addEventListener("click", newGame);
-
-    ui.pickRandom.addEventListener("click", ()=>{
-      const available = state.cases.map(c=>c.id);
-      const id = available[Math.floor(Math.random()*available.length)];
+    if(!state.myCaseId){
       pickMyCase(id);
-    });
+      return;
+    }
 
-    ui.pickClose.addEventListener("click", ()=>{
-      if (!state.myCaseId) return;
-      closeModal(ui.pickModal);
-    });
+    if(id === state.myCaseId){
+      setHint("Questa è la tua località. Apri un’altra località.");
+      return;
+    }
 
-    ui.revealOk.addEventListener("click", ()=>{
-      closeModal(ui.revealModal);
-      queueMoments();
-    });
-    ui.revealClose.addEventListener("click", ()=>{
-      closeModal(ui.revealModal);
-      queueMoments();
-    });
+    // apri pacco
+    c.opened = true;
+    state.removedPrizeIds.add(c.prizeId);
+    state.openedCount += 1;
 
-    ui.offerAccept.addEventListener("click", acceptOffer);
-    ui.offerReject.addEventListener("click", rejectOffer);
+    const remaining = remainingCaseIds().length;
 
-    ui.swapSkip.addEventListener("click", skipSwap);
-  } else {
-    ui.btnNew.disabled = true;
-    ui.btnSwap.disabled = true;
+    // mostra premio uscito
+    showRevealModal(
+      getCaseName(c.id),
+      c.prizeLabel,
+      `Pacchi aperti: ${state.openedCount} • Pacchi rimasti: ${remaining}`
+    );
+
+    renderAll();
+
+    // --- MOMENTI SPECIALI (come hai deciso tu) ---
+    if (CONFIG.offerMoments.includes(state.openedCount) && !state.offerDone.has(state.openedCount)) {
+      queueOffer();
+      return;
+    }
+
+    if (CONFIG.swapMoments.includes(state.openedCount) && !state.swapDone.has(state.openedCount)) {
+      queueSwap("opened10");
+      return;
+    }
+
+    if (CONFIG.finalSwapAtTwoLeft && remaining === 2 && !state.finalSwapDone) {
+      queueSwap("final2");
+      return;
+    }
   }
-}
 
-// =======================
-// INIT
-// =======================
-bindEvents();
-newGame();
+  /* ===== AVVIO / NUOVA PARTITA ===== */
+  function newGame(){
+    const ok =
+      CONFIG.casesCount === CONFIG.caseNames.length &&
+      CONFIG.casesCount === CONFIG.prizeLabels.length &&
+      CONFIG.casesCount === CONFIG.prizeValues.length;
 
+    if(!ok){
+      alert("Errore CONFIG: casesCount deve essere uguale a caseNames, prizeLabels e prizeValues.");
+      return;
+    }
+
+    const allPrizes = CONFIG.prizeLabels.map((label,i)=>({
+      id:i+1,
+      label,
+      value:CONFIG.prizeValues[i]
+    }));
+
+    const shuffled = shuffle([...allPrizes]);
+
+    state = {
+      phase: "playing",
+      myCaseId: null,
+      lastOffer: null,
+
+      openedCount: 0,
+      offersMade: 0,
+
+      swapsLeft: CONFIG.maxSwaps,
+
+      offerDone: new Set(),
+      swapDone: new Set(),
+      finalSwapDone: false,
+
+      nextForced: null,
+
+      allPrizes,
+      removedPrizeIds: new Set(),
+
+      cases: Array.from({length:CONFIG.casesCount}, (_,i)=>({
+        id:i+1,
+        prizeId: shuffled[i].id,
+        prizeLabel: shuffled[i].label,
+        prizeValue: shuffled[i].value,
+        opened:false
+      }))
+    };
+
+    // reset UI
+    $("resultBox").hidden = true;
+    renderOffer(null);
+    setBankerLine("Scegli il tuo pacco.");
+    setHint("Scegli la tua località (il tuo pacco).");
+
+    // chiudi modali
+    closeModal(ui.revealModal);
+    closeModal(ui.offerModal);
+    closeModal(ui.swapModal);
+    closeModal(ui.pickModal);
+
+    renderAll();
+    showPickModal();
+  }
+
+  ui.btnNew.addEventListener("click", newGame);
+
+  // bottone swap non serve (modal obbligatorio quando scatta), lo lasciamo spento
+  ui.btnSwap.addEventListener("click", () => {});
+
+  newGame();
+});
