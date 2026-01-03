@@ -4,7 +4,12 @@
 const params = new URLSearchParams(window.location.search);
 const MODE = (params.get("mode") || "game").toLowerCase(); // "game" | "screen"
 console.log("MODE:", MODE);
-document.body.dataset.mode = MODE;
+
+// attiva la modalità anche per il CSS (sicuro dopo caricamento DOM)
+document.addEventListener("DOMContentLoaded", () => {
+  document.body.setAttribute("data-mode", MODE);
+});
+
 
 
 // =======================
