@@ -4,22 +4,27 @@
 const params = new URLSearchParams(window.location.search);
 const MODE = (params.get("mode") || "game").toLowerCase(); // "game" | "screen"
 console.log("MODE:", MODE);
-// =======================
-// FIREBASE INIT
-// =======================
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
 
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-    apiKey: "AIzaSyDc_SVC5FFyMf6fZeN0Be_kIAWWWBj8tYg",
-    authDomain: "affari-tuoi-1b994.firebaseapp.com",
-    projectId: "affari-tuoi-1b994",
-    storageBucket: "affari-tuoi-1b994.firebasestorage.app",
-    messagingSenderId: "639378779280",
-    appId: "1:639378779280:web:dc550dd56b529bdfb93c15",
-    measurementId: "G-JP7JTV9NTF"
+  apiKey: "AIzaSyDc_SVC5FFyMf6fZeN0Be_kIAWWWBj8tYg",
+  authDomain: "affari-tuoi-1b994.firebaseapp.com",
+  projectId: "affari-tuoi-1b994",
+  storageBucket: "affari-tuoi-1b994.firebasestorage.app",
+  messagingSenderId: "639378779280",
+  appId: "1:639378779280:web:dc550dd56b529bdfb93c15",
+  measurementId: "G-JP7JTV9NTF"
 };
 
-// Init Firebase
-firebase.initializeApp(firebaseConfig);
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
 
 // Init Firestore
 const db = firebase.firestore();
