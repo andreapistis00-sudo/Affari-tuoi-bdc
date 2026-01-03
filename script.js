@@ -4,6 +4,7 @@
 const params = new URLSearchParams(window.location.search);
 const MODE = (params.get("mode") || "game").toLowerCase(); // "game" | "screen"
 console.log("MODE:", MODE);
+
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
