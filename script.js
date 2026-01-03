@@ -1,10 +1,21 @@
 // =======================
-// MODALITÀ: game / screen  ✅ (MODIFICA 1)
+// MODALITÀ: game / screen
 // =======================
 const params = new URLSearchParams(window.location.search);
 const MODE = (params.get("mode") || "game").toLowerCase(); // "game" | "screen"
 console.log("MODE:", MODE);
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+
+// attiva la modalità anche per il CSS (sicuro dopo caricamento DOM)
+document.addEventListener("DOMContentLoaded", () => {
+  document.body.setAttribute("data-mode", MODE);
+});
+
+// =======================
+// FIREBASE (compat) - INIT
+// =======================
+// Usa gli script in index.html:
+// firebase-app-compat.js + firebase-firestore-compat.js
+
 const firebaseConfig = {
   apiKey: "AIzaSyDc_SVC5FFyMf6fZeN0Be_kIAWWWBj8tYg",
   authDomain: "affari-tuoi-1b994.firebaseapp.com",
@@ -15,18 +26,14 @@ const firebaseConfig = {
   measurementId: "G-JP7JTV9NTF"
 };
 
+// ✅ MANCAVA QUESTO: inizializza Firebase
+firebase.initializeApp(firebaseConfig);
 
 // Init Firestore
 const db = firebase.firestore();
 
-console.log("🔥 Firebase inizializzato", db);
-
-// attiva la modalità anche per il CSS (sicuro dopo caricamento DOM)
-document.addEventListener("DOMContentLoaded", () => {
-  document.body.setAttribute("data-mode", MODE);
-});
-
-
+console.log("✅ Firebase collegato:", firebase.app().options.projectId);
+console.log("🔥 Firestore pronto:", db);
 
 // =======================
 // CONFIG
@@ -195,8 +202,6 @@ function renderAll(){
 }
 
 function renderPrizeGrid(){
-  // ricostruiamo lista "compatta" dai pacchi assegnati (premi unici)
-  // prendiamo tutti i premi originali (20) e segniamo out se aperti
   const allPrizes = [];
   const seen = new Set();
   for (const c of state.cases){
@@ -206,7 +211,6 @@ function renderPrizeGrid(){
       allPrizes.push(c.prize);
     }
   }
-  // ordina per numero premio
   allPrizes.sort((a,b)=>{
     const na = parseInt(a.label.replace(/\D/g,""),10);
     const nb = parseInt(b.label.replace(/\D/g,""),10);
@@ -239,7 +243,6 @@ function renderCaseGrid(){
     btn.disabled = c.opened || (state.status !== "playing") || (c.id === state.myCaseId);
     btn.textContent = c.name;
 
-    // ✅ (MODIFICA 2) click solo in MODE=game
     if (MODE === "game") {
       btn.addEventListener("click", ()=> onCaseClick(c.id));
     }
@@ -252,7 +255,6 @@ function renderCaseGrid(){
 // PICK MODAL
 // =======================
 function showPickModalMandatory(){
-  // in screen mode mostriamo solo lo stato, non forziamo modali
   if (MODE !== "game") return;
 
   ui.pickGrid.innerHTML = "";
@@ -282,7 +284,6 @@ function pickMyCase(caseId){
 // OPEN CASE
 // =======================
 function onCaseClick(caseId){
-  // ✅ (MODIFICA 3) blocca qualsiasi click su screen
   if (MODE !== "game") return;
 
   if (state.status !== "playing") return;
@@ -298,8 +299,6 @@ function onCaseClick(caseId){
 
   renderAll();
   showRevealModal(c.name, c.prize.label);
-
-  // momenti speciali dopo la rivelazione (quando premi OK)
 }
 
 // =======================
@@ -341,7 +340,6 @@ function shouldTriggerFirstSwap(){
   return state.openedCount >= SWAP_MOMENT && !state.firstSwapDone;
 }
 function shouldTriggerFinalSwap(){
-  // ultimi 2 pacchi chiusi totali (incluso il tuo)
   const unopened = remainingUnopenedCases().length;
   return unopened === 2 && !state.finalSwapDone && state.status === "playing";
 }
@@ -357,10 +355,6 @@ function queueMoments(){
     showSwapModalMandatory(false);
     return;
   }
-  if (shouldTriggerOffer()){
-    showOfferModalMandatory();
-    return;
-  }
   if (shouldTriggerFinalSwap()){
     showSwapModalMandatory(true);
     return;
@@ -369,7 +363,6 @@ function queueMoments(){
 
 // OFFER MODAL
 function showOfferModalMandatory(){
-  // segna questo momento come fatto (così non si ripete)
   state.offersDone.add(state.openedCount);
 
   const offer = computeOffer();
@@ -378,7 +371,6 @@ function showOfferModalMandatory(){
   ui.offerValue.textContent = String(offer);
   ui.offerModalValue.textContent = String(offer);
 
-  // rendi “obbligatorio”: il close non fa nulla
   ui.offerClose.disabled = true;
   ui.offerClose.style.opacity = "0.4";
   ui.offerClose.style.pointerEvents = "none";
@@ -401,6 +393,8 @@ function acceptOffer(){
 function rejectOffer(){
   closeModal(ui.offerModal);
   renderAll();
+  // dopo il rifiuto controlla se serve subito un cambio
+  queueMoments();
 }
 
 // SWAP MODAL
@@ -438,7 +432,6 @@ function doSwapWith(otherId){
   const other = state.cases.find(x=>x.id===otherId);
   if (!my || !other || other.opened) return;
 
-  // scambia i due pacchi (premi assegnati)
   const tmpPrize = my.prize;
   my.prize = other.prize;
   other.prize = tmpPrize;
@@ -456,7 +449,6 @@ function skipSwap(){
 // EVENTS
 // =======================
 function bindEvents(){
-  // ✅ (MODIFICA 2) in screen non agganciamo eventi di gioco
   if (MODE === "game") {
     ui.btnNew.addEventListener("click", newGame);
 
@@ -467,14 +459,12 @@ function bindEvents(){
     });
 
     ui.pickClose.addEventListener("click", ()=>{
-      // il pick è obbligatorio: non chiudere se non scelto
       if (!state.myCaseId) return;
       closeModal(ui.pickModal);
     });
 
     ui.revealOk.addEventListener("click", ()=>{
       closeModal(ui.revealModal);
-      // dopo aver chiuso la rivelazione, controlla i momenti speciali
       queueMoments();
     });
     ui.revealClose.addEventListener("click", ()=>{
@@ -487,7 +477,6 @@ function bindEvents(){
 
     ui.swapSkip.addEventListener("click", skipSwap);
   } else {
-    // mode=screen: niente click che cambiano stato
     ui.btnNew.disabled = true;
     ui.btnSwap.disabled = true;
   }
@@ -498,3 +487,4 @@ function bindEvents(){
 // =======================
 bindEvents();
 newGame();
+
