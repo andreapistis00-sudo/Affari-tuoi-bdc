@@ -1,3 +1,35 @@
+// ✅ [AGGIUNTO] Firebase imports (serve type="module" nello script tag)
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
+import { getFirestore, doc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyDc_SVC5FFyMf6fZeN0Be_kIAWWWBj8tYg",
+  authDomain: "affari-tuoi-1b994.firebaseapp.com",
+  projectId: "affari-tuoi-1b994",
+  storageBucket: "affari-tuoi-1b994.firebasestorage.app",
+  messagingSenderId: "639378779280",
+  appId: "1:639378779280:web:dc550dd56b529bdfb93c15",
+  measurementId: "G-JP7JTV9NTF"
+};
+};
+
+// ✅ [AGGIUNTO] Init Firebase + riferimento stanza (per ora fisso)
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const roomId = "TEST-ROOM";
+const roomRef = doc(db, "rooms", roomId);
+
+// ✅ [AGGIUNTO] Funzione per aggiornare jackpot su Firestore
+async function pushJackpot(value) {
+  const jackpotNumber = Number(value) || 0;
+  try {
+    await updateDoc(roomRef, { jackpot: jackpotNumber });
+  } catch (e) {
+    console.error("Errore aggiornamento jackpot:", e);
+  }
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   const CONFIG = {
     title: "IL GIOCO DEI PACCHI",
@@ -119,6 +151,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const vals = remainingCases().map(c => c.prizeValue);
     const sum = vals.reduce((s,v)=>s+v,0);
     return vals.length ? sum/vals.length : 0;
+  }
+
+  // ✅ [AGGIUNTO] montepremi = somma dei premi ancora in gioco
+  function computeJackpot(){
+    return remainingCases().reduce((sum, c) => sum + (Number(c.prizeValue) || 0), 0);
   }
 
   function setHint(t){ ui.hintText.textContent=t; }
@@ -433,6 +470,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     renderAll();
 
+    // ✅ [AGGIUNTO] aggiorna montepremi in TV (live)
+    pushJackpot(computeJackpot());
+
     // --- MOMENTI SPECIALI (come hai deciso tu) ---
     if (CONFIG.offerMoments.includes(state.openedCount) && !state.offerDone.has(state.openedCount)) {
       queueOffer();
@@ -512,6 +552,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     renderAll();
     showPickModal();
+
+    // ✅ [AGGIUNTO] all’avvio partita mando il jackpot iniziale
+    pushJackpot(computeJackpot());
   }
 
   ui.btnNew.addEventListener("click", newGame);
@@ -521,3 +564,4 @@ document.addEventListener("DOMContentLoaded", () => {
 
   newGame();
 });
+;
