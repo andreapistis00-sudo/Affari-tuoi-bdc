@@ -241,8 +241,13 @@ document.addEventListener("DOMContentLoaded", () => {
     renderAll();
   }
 
-  ui.pickClose.addEventListener("click", () => setHint("Devi scegliere una località per iniziare."));
-  ui.pickModal.addEventListener("click", (e)=>{ if(e.target===ui.pickModal) setHint("Devi scegliere una località per iniziare."); });
+  // Se vuoi che la scelta sia obbligatoria, non chiudiamo: diamo solo feedback.
+  ui.pickClose.addEventListener("click", () => {
+    setHint("Devi scegliere una località per iniziare.");
+  });
+  ui.pickModal.addEventListener("click", (e)=>{
+    if(e.target===ui.pickModal) setHint("Devi scegliere una località per iniziare.");
+  });
   ui.pickRandom.addEventListener("click", ()=>{
     const ids = state.cases.map(c=>c.id);
     pickMyCase(ids[Math.floor(Math.random()*ids.length)]);
@@ -258,10 +263,9 @@ document.addEventListener("DOMContentLoaded", () => {
   function hideRevealModal(){
     closeModal(ui.revealModal);
 
-    // se c’era un’azione obbligatoria “in coda”, la eseguo ora
-    if(state.nextForced){
-      const next = state.nextForced;
-      state.nextForced = null;
+    // se c’era un’azione obbligatoria “in coda”, la eseguo ora (FIFO)
+    if(state.nextForced && state.nextForced.length){
+      const next = state.nextForced.shift();
       if(next.type === "offer") showOfferModalMandatory(next.offer);
       if(next.type === "swap") showSwapModalMandatory();
     }
@@ -313,7 +317,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   ui.swapSkip.addEventListener("click", skipSwap);
   ui.swapClose.addEventListener("click", skipSwap);
-  ui.swapModal.addEventListener("click", (e)=>{ if(e.target===ui.swapModal) {/* blocco */} });
+  ui.swapModal.addEventListener("click", (e) => {
+    if (e.target === ui.swapModal) {
+      ui.swapSub.textContent = "Devi scegliere un pacco oppure premere 'Continua senza cambiare'.";
+    }
+  });
 
   /* ===== MODAL: OFFERTA (obbligatorio) ===== */
   function showOfferModalMandatory(offer){
@@ -330,10 +338,10 @@ document.addEventListener("DOMContentLoaded", () => {
     setBankerLine("Offerta accettata!");
     setHint("Partita finita.");
 
-    $("resultBox").hidden = false;
-    $("resultTitle").textContent = "OFFERTA ACCETTATA!";
-    $("resultText").textContent =
-      `Hai accettato: ${formatPoints(state.lastOffer)}.\n`+
+    ui.resultBox.hidden = false;
+    ui.resultTitle.textContent = "OFFERTA ACCETTATA!";
+    ui.resultText.innerHTML =
+      `Hai accettato: ${formatPoints(state.lastOffer)}.<br>` +
       `Nel tuo pacco (${getCaseName(state.myCaseId)}) c’era: ${my.prizeLabel}.`;
 
     state.phase = "ended";
@@ -372,9 +380,10 @@ document.addEventListener("DOMContentLoaded", () => {
     state.offersMade += 1;
     state.offerDone.add(state.openedCount);
 
-    // se c’è un reveal aperto, metto “in coda”
+    // coda azioni obbligatorie
+    if(!state.nextForced) state.nextForced = [];
     if(!ui.revealModal.hidden){
-      state.nextForced = { type: "offer", offer };
+      state.nextForced.push({ type: "offer", offer });
     } else {
       showOfferModalMandatory(offer);
     }
@@ -389,9 +398,10 @@ document.addEventListener("DOMContentLoaded", () => {
     if(kindKey === "opened10") state.swapDone.add(10);
     if(kindKey === "final2") state.finalSwapDone = true;
 
-    // se c’è reveal aperto, metto in coda
+    // coda azioni obbligatorie
+    if(!state.nextForced) state.nextForced = [];
     if(!ui.revealModal.hidden){
-      state.nextForced = { type: "swap" };
+      state.nextForced.push({ type: "swap" });
     } else {
       showSwapModalMandatory();
     }
@@ -484,7 +494,7 @@ document.addEventListener("DOMContentLoaded", () => {
       swapDone: new Set(),
       finalSwapDone: false,
 
-      nextForced: null,
+      nextForced: [],
 
       allPrizes,
       removedPrizeIds: new Set(),
@@ -499,7 +509,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     // reset UI
-    $("resultBox").hidden = true;
+    ui.resultBox.hidden = true;
     renderOffer(null);
     setBankerLine("Scegli il tuo pacco.");
     setHint("Scegli la tua località (il tuo pacco).");
