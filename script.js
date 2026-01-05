@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
   const CONFIG = {
-    title: "IL GIOCO DEI PACCHI",
+    title: "AFFARI TUOI AL BDC",
     subtitle: "Scegli una località e prova a portarti a casa il premio migliore!",
     bankerName: "Il Banco",
     currency: "punti",
