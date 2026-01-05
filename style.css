@@ -330,25 +330,19 @@ body.modal-open{ overflow:hidden; }
 /* Mobile: mantieni layout desktop e scala l'intera app */
 @media (max-width: 520px){
   .app{
-    transform: scale(.85);
+    transform: scale(.70);
     transform-origin: top center;
-    width: calc(100% / .85);
+    width: calc(100% / .70);
   }
 }
-/* Mobile: mantieni layout desktop e scala l'intera app */
-@media (max-width: 520px){
-  .app{
-    transform: scale(.85);
-    transform-origin: top center;
-    width: calc(100% / .85);
   }
 }
 @media (max-width: 520px){
   /* Scala anche i modali (sono fuori da .app) */
   .modalCard{
-    transform: scale(.85);
+    transform: scale(.70);
     transform-origin: top center;
-    width: calc(100% / .85);
+    width: calc(100% / .70);
   }
 }
 
