@@ -90,68 +90,7 @@
 
       <footer class="footer">
         <span id="footerText">Grafica mantenuta • Offerta/Cambio a momenti scelti</span>
-        <button class="staffLink" id="btnStaff" type="button">STAFF</button>
       </footer>
-    </div>
-
-    <!-- MODAL: ACCESSO CON CODICE (obbligatorio) -->
-    <div class="modal" id="accessModal" hidden>
-      <div class="modalCard" role="dialog" aria-modal="true" aria-labelledby="accessTitle">
-        <div class="modalTop">
-          <div class="modalBadge" id="accessTitle">INSERISCI CODICE</div>
-          <button class="modalClose" id="accessClose" aria-label="Chiudi">✕</button>
-        </div>
-
-        <div class="modalBody">
-          <div class="modalIcon" aria-hidden="true">🔒</div>
-          <div class="modalPlace">Per giocare serve un codice valido.</div>
-          <div class="modalSub">Chiedi allo staff il codice dopo il pagamento.</div>
-
-          <div class="accessForm">
-            <input
-              id="accessCodeInput"
-              class="accessInput"
-              type="text"
-              inputmode="text"
-              autocomplete="one-time-code"
-              placeholder="Es. AB12C"
-              maxlength="5"
-            />
-            <button class="btn" id="accessSubmit">SBLOCCA</button>
-          </div>
-
-          <div class="accessError" id="accessError" hidden></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- MODAL: STAFF (PIN + genera codice) -->
-    <div class="modal" id="staffModal" hidden>
-      <div class="modalCard" role="dialog" aria-modal="true" aria-labelledby="staffTitle">
-        <div class="modalTop">
-          <div class="modalBadge" id="staffTitle">PANNELLO STAFF</div>
-          <button class="modalClose" id="staffClose" aria-label="Chiudi">✕</button>
-        </div>
-
-        <div class="modalBody">
-          <div class="modalIcon" aria-hidden="true">🧾</div>
-          <div class="modalPlace">Genera un codice partita</div>
-          <div class="modalSub">Inserisci PIN staff per generare un codice “ready”.</div>
-
-          <div class="staffForm">
-            <input id="staffPin" class="staffInput" type="password" inputmode="numeric" placeholder="PIN staff" />
-            <button class="btn" id="staffGenerate">GENERA CODICE</button>
-          </div>
-
-          <div class="staffCodeBox" id="staffCodeBox" hidden>
-            <div class="staffCodeLabel">Codice generato</div>
-            <div class="staffCode" id="staffCode">—</div>
-            <button class="btn secondary" id="staffCopy">COPIA</button>
-          </div>
-
-          <div class="accessError" id="staffError" hidden></div>
-        </div>
-      </div>
     </div>
 
     <!-- MODAL: SCEGLI IL TUO PACCO (obbligatorio) -->
@@ -241,10 +180,6 @@
         </div>
       </div>
     </div>
-
-    <!-- Firebase compat (ok anche se qui usiamo fetch alle Functions) -->
-    <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
 
     <script src="script.js"></script>
   </body>
