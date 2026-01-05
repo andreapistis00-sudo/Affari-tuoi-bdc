@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", () => {
     ],
 
     prizeLabels: [
-      "Premio 1","Premio 2","Premio 3","Premio 4","Premio 5",
+      "Niente","Premio 2","Premio 3","Premio 4","Premio 5",
       "Premio 6","Premio 7","Premio 8","Premio 9","Premio 10",
       "Premio 11","Premio 12","Premio 13","Premio 14","Premio 15",
       "Premio 16","Premio 17","Premio 18","Premio 19","Premio 20"
