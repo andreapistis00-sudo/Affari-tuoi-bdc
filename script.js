@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
-    const CONFIG = {
-    title: "AFFARI TUOI AL BDC",
+  const CONFIG = {
+    title: "IL GIOCO DEI PACCHI",
     subtitle: "Scegli una località e prova a portarti a casa il premio migliore!",
     bankerName: "Il Banco",
     currency: "punti",
@@ -21,7 +21,6 @@ document.addEventListener("DOMContentLoaded", () => {
       "Premio 16","Premio 17","Premio 18","Premio 19","Premio 20"
     ],
 
-    // valori interni solo per calcolare l’offerta (non mostrati)
     prizeValues: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20],
 
     offerMoments: [5, 15],
@@ -91,7 +90,14 @@ document.addEventListener("DOMContentLoaded", () => {
     swapMyCase: $("swapMyCase"),
     swapSub: $("swapSub"),
     swapSkip: $("swapSkip"),
-    swapClose: $("swapClose")
+    swapClose: $("swapClose"),
+
+    // access
+    accessModal: $("accessModal"),
+    accessClose: $("accessClose"),
+    accessCodeInput: $("accessCodeInput"),
+    accessSubmit: $("accessSubmit"),
+    accessError: $("accessError")
   };
 
   /* ===== UTIL ===== */
@@ -128,7 +134,6 @@ document.addEventListener("DOMContentLoaded", () => {
   function openModal(modalEl){
     scrollY = window.scrollY;
 
-    // blocco scroll body anche su iOS
     document.body.style.position = "fixed";
     document.body.style.top = `-${scrollY}px`;
     document.body.style.width = "100%";
@@ -144,7 +149,8 @@ document.addEventListener("DOMContentLoaded", () => {
       !ui.pickModal.hidden ||
       !ui.revealModal.hidden ||
       !ui.offerModal.hidden ||
-      !ui.swapModal.hidden;
+      !ui.swapModal.hidden ||
+      !ui.accessModal.hidden;
 
     if(!anyOpen){
       document.body.classList.remove("modal-open");
@@ -162,9 +168,46 @@ document.addEventListener("DOMContentLoaded", () => {
       !ui.pickModal.hidden ||
       !ui.revealModal.hidden ||
       !ui.offerModal.hidden ||
-      !ui.swapModal.hidden
+      !ui.swapModal.hidden ||
+      !ui.accessModal.hidden
     );
   }
+
+  /* ===== ACCESS GATE (STEP 1: UI + blocco) ===== */
+  function showAccessError(msg){
+    ui.accessError.hidden = !msg;
+    ui.accessError.textContent = msg || "";
+  }
+
+  function openAccessGate(){
+    showAccessError("");
+    ui.accessCodeInput.value = "";
+    openModal(ui.accessModal);
+    setHint("Inserisci un codice per giocare.");
+  }
+
+  function handleAccessSubmit(){
+    const code = (ui.accessCodeInput.value || "").trim().toUpperCase();
+    if(!code){
+      showAccessError("Inserisci un codice.");
+      return;
+    }
+
+    // Step 2: qui faremo la verifica su Firestore e lo "consumo" del codice.
+    showAccessError("Codice inserito. (Step 2: verifica con staff/Firestore)");
+  }
+
+  ui.accessSubmit.addEventListener("click", handleAccessSubmit);
+  ui.accessCodeInput.addEventListener("keydown", (e)=>{
+    if(e.key === "Enter") handleAccessSubmit();
+  });
+
+  ui.accessClose.addEventListener("click", () => {
+    showAccessError("Devi inserire un codice valido per giocare.");
+  });
+  ui.accessModal.addEventListener("click", (e)=>{
+    if(e.target === ui.accessModal) showAccessError("Devi inserire un codice valido per giocare.");
+  });
 
   /* ===== RENDER ===== */
   function prizeTierByValue(v){
@@ -520,8 +563,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     ui.resultBox.hidden = true;
     renderOffer(null);
-    setBankerLine("Scegli il tuo pacco.");
-    setHint("Scegli la tua località (il tuo pacco).");
+    setBankerLine("Accesso richiesto.");
+    setHint("Inserisci il codice per giocare.");
 
     closeModal(ui.revealModal);
     closeModal(ui.offerModal);
@@ -529,7 +572,8 @@ document.addEventListener("DOMContentLoaded", () => {
     closeModal(ui.pickModal);
 
     renderAll();
-    showPickModal();
+    openAccessGate();
+    return;
   }
 
   ui.btnNew.addEventListener("click", newGame);
