@@ -189,3 +189,56 @@
     <script src="script.js"></script>
   </body>
 </html>
+/* ✅ MOBILE "VERO": ordine pannelli + tap-friendly */
+@media (max-width: 980px){
+
+  /* header più compatto */
+  .topbar{
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .status{
+    justify-content: flex-start;
+  }
+  .chip{
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  /* ordine pannelli: gioco prima */
+  .board{ order: 1; }
+  .offer{ order: 2; }
+  .prizes{ order: 3; }
+
+  /* griglia pacchi più comoda */
+  .caseGrid{
+    gap: 10px;
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .caseBtn{
+    min-height: 84px;
+    padding: 14px 10px;
+  }
+  .caseBtn .num{
+    font-size: 13px;
+  }
+  .caseBtn .small{
+    font-size: 11px;
+  }
+
+  /* azioni full-width */
+  .actions{
+    flex-direction: column;
+    gap: 10px;
+  }
+  .actions .btn{
+    width: 100%;
+  }
+
+  /* premi: area più bassa e scroll interna */
+  .prizeGrid{
+    max-height: 260px;
+  }
+}
+
