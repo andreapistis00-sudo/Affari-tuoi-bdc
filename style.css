@@ -346,7 +346,7 @@ body.modal-open{ overflow: hidden; }
   border-color: rgba(251,113,133,.55);
 }
 
-/* PIN */
+/* PIN (riuso stile access) */
 .accessForm{
   margin-top: 14px;
   display:flex;
@@ -365,10 +365,6 @@ body.modal-open{ overflow: hidden; }
   font-weight: 900;
   letter-spacing: .12em;
   outline: none;
-
-  /* ✅ nasconde i caratteri (iOS/Safari) */
-  -webkit-text-security: disc;
-  caret-color: var(--text);
 }
 .accessInput::placeholder{
   color: rgba(234,240,255,.45);
