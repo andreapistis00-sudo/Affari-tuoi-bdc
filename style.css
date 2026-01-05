@@ -229,7 +229,24 @@ body{
   color:rgba(234,240,255,.6);
   font-size:12px;
   text-align:center;
+  display:flex;
+  gap:10px;
+  justify-content:center;
+  align-items:center;
+  flex-wrap:wrap;
 }
+.staffLink{
+  border:1px solid var(--border);
+  background: rgba(255,255,255,.06);
+  color: rgba(234,240,255,.8);
+  padding:6px 10px;
+  border-radius:999px;
+  cursor:pointer;
+  font-weight:800;
+  letter-spacing:.08em;
+  font-size:11px;
+}
+.staffLink:hover{ transform: translateY(-1px); }
 
 /* MODAL */
 .modal{
@@ -341,8 +358,9 @@ body.modal-open{ overflow: hidden; }
   border-color: rgba(251,113,133,.55);
 }
 
-/* ACCESSO CODICE */
-.accessForm{
+/* ACCESSO CODICE / STAFF ERROR */
+.accessForm,
+.staffForm{
   margin-top: 14px;
   display:flex;
   gap:10px;
@@ -350,7 +368,8 @@ body.modal-open{ overflow: hidden; }
   justify-content:center;
   flex-wrap:wrap;
 }
-.accessInput{
+.accessInput,
+.staffInput{
   width: min(320px, 100%);
   border: 1px solid var(--border);
   background: rgba(0,0,0,.18);
@@ -362,7 +381,13 @@ body.modal-open{ overflow: hidden; }
   text-transform: uppercase;
   outline: none;
 }
-.accessInput::placeholder{
+.staffInput{
+  letter-spacing: .12em;
+  text-transform: none;
+  font-weight: 900;
+}
+.accessInput::placeholder,
+.staffInput::placeholder{
   color: rgba(234,240,255,.45);
   letter-spacing: 0;
   text-transform: none;
@@ -376,6 +401,26 @@ body.modal-open{ overflow: hidden; }
   background: rgba(251,113,133,.12);
   color: rgba(234,240,255,.9);
   font-size: 12px;
+}
+
+.staffCodeBox{
+  margin-top: 14px;
+  border:1px solid var(--border);
+  border-radius: 18px;
+  background: rgba(0,0,0,.18);
+  padding: 12px;
+  display:grid;
+  gap:10px;
+  justify-items:center;
+}
+.staffCodeLabel{
+  color: var(--muted);
+  font-size: 12px;
+}
+.staffCode{
+  font-size: 28px;
+  font-weight: 950;
+  letter-spacing: .16em;
 }
 
 /* MOBILE */
