@@ -235,18 +235,6 @@ body{
   align-items:center;
   flex-wrap:wrap;
 }
-.staffLink{
-  border:1px solid var(--border);
-  background: rgba(255,255,255,.06);
-  color: rgba(234,240,255,.8);
-  padding:6px 10px;
-  border-radius:999px;
-  cursor:pointer;
-  font-weight:800;
-  letter-spacing:.08em;
-  font-size:11px;
-}
-.staffLink:hover{ transform: translateY(-1px); }
 
 /* MODAL */
 .modal{
@@ -356,71 +344,6 @@ body.modal-open{ overflow: hidden; }
 #offerReject{
   background: rgba(251,113,133,.22);
   border-color: rgba(251,113,133,.55);
-}
-
-/* ACCESSO CODICE / STAFF ERROR */
-.accessForm,
-.staffForm{
-  margin-top: 14px;
-  display:flex;
-  gap:10px;
-  align-items:center;
-  justify-content:center;
-  flex-wrap:wrap;
-}
-.accessInput,
-.staffInput{
-  width: min(320px, 100%);
-  border: 1px solid var(--border);
-  background: rgba(0,0,0,.18);
-  color: var(--text);
-  border-radius: 14px;
-  padding: 12px 12px;
-  font-weight: 800;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  outline: none;
-}
-.staffInput{
-  letter-spacing: .12em;
-  text-transform: none;
-  font-weight: 900;
-}
-.accessInput::placeholder,
-.staffInput::placeholder{
-  color: rgba(234,240,255,.45);
-  letter-spacing: 0;
-  text-transform: none;
-  font-weight: 600;
-}
-.accessError{
-  margin-top: 12px;
-  padding: 10px 12px;
-  border-radius: 14px;
-  border: 1px solid rgba(251,113,133,.55);
-  background: rgba(251,113,133,.12);
-  color: rgba(234,240,255,.9);
-  font-size: 12px;
-}
-
-.staffCodeBox{
-  margin-top: 14px;
-  border:1px solid var(--border);
-  border-radius: 18px;
-  background: rgba(0,0,0,.18);
-  padding: 12px;
-  display:grid;
-  gap:10px;
-  justify-items:center;
-}
-.staffCodeLabel{
-  color: var(--muted);
-  font-size: 12px;
-}
-.staffCode{
-  font-size: 28px;
-  font-weight: 950;
-  letter-spacing: .16em;
 }
 
 /* MOBILE */
