@@ -445,7 +445,6 @@ document.addEventListener("DOMContentLoaded", () => {
   openModal(ui.offerModal);
 }
 
-  }
 
   function acceptOffer(){
     closeModal(ui.offerModal);
