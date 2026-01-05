@@ -31,16 +31,16 @@ document.addEventListener("DOMContentLoaded", () => {
     maxSwaps: 2
   };
 
-  /* ===== Firebase init (obbligatorio: incolla la tua config reale) ===== */
-  const firebaseConfig = {
-    // INCOLLA QUI (Firebase Console -> Project settings -> Your apps -> Web app)
-    // apiKey: "...",
-    // authDomain: "...",
-    // projectId: "...",
-    // storageBucket: "...",
-    // messagingSenderId: "...",
-    // appId: "..."
-  };
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyDc_SVC5FFyMf6fZeN0Be_kIAWWWBj8tYg",
+  authDomain: "affari-tuoi-1b994.firebaseapp.com",
+  projectId: "affari-tuoi-1b994",
+  storageBucket: "affari-tuoi-1b994.firebasestorage.app",
+  messagingSenderId: "639378779280",
+  appId: "1:639378779280:web:dc550dd56b529bdfb93c15",
+  measurementId: "G-JP7JTV9NTF"
+};
 
   if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 
