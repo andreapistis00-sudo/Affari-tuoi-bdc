@@ -45,12 +45,15 @@ const firebaseConfig = {
   if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 
   /* ===== Cloud Functions URL (OBBLIGATORIO) ===== */
-  const PROJECT_ID = "IL_TUO_PROJECT_ID";
-  const REGION = "us-central1";
-  const FUNCTIONS_BASE = `https://${REGION}-${PROJECT_ID}.cloudfunctions.net`;
-  const URL_CREATE = `${FUNCTIONS_BASE}/createCode`;
-  const URL_REDEEM = `${FUNCTIONS_BASE}/redeemCode`;
-  const URL_FINISH = `${FUNCTIONS_BASE}/finishGame`;
+  const FUNCTIONS_REGION = "us-central1";
+const PROJECT_ID = "affari-tuoi-1b994";
+
+const FUNCTIONS_BASE = `https://${FUNCTIONS_REGION}-${PROJECT_ID}.cloudfunctions.net`;
+const URL_REDEEM = `${FUNCTIONS_BASE}/redeemCode`;
+const URL_FINISH = `${FUNCTIONS_BASE}/finishGame`;
+const URL_CREATE = `${FUNCTIONS_BASE}/createCode`;
+
+
 
   let state = null;
   let scrollY = 0;
