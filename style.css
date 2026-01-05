@@ -7,12 +7,13 @@
   --shadow: 0 20px 60px rgba(0,0,0,.45);
   --radius: 18px;
 
-  /* ✅ scala UI automatica (desktop fisso + autoscale) */
+  /* scala UI automatica (desktop fisso + autoscale) */
   --ui-scale: 1;
 }
 
 *{ box-sizing:border-box; }
 html,body{ height:100%; }
+
 body{
   margin:0;
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
@@ -21,19 +22,18 @@ body{
               var(--bg);
   color:var(--text);
 
-  /* ✅ evita overflow orizzontale dovuto a transform su .app */
   overflow-x: hidden;
-    display: flex;
-  justify-content: center;
-  align-items: flex-start;
 
+  /* ✅ centratura stabile dell'app */
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
 }
 
-/* ✅ Desktop base fisso 1200px + scala automatica */
 .app{
   width: 1200px;
-  margin: 0;
   padding:18px;
+  margin: 0;
 
   transform: scale(var(--ui-scale));
   transform-origin: top center;
@@ -74,7 +74,6 @@ body{
   box-shadow:var(--shadow);
   padding:14px;
 }
-
 .panel h2{ margin:0 0 10px; font-size:16px; }
 
 .prizeGrid{
@@ -252,7 +251,9 @@ body{
   background: rgba(0,0,0,.55);
   backdrop-filter: blur(6px);
   z-index: 9999;
-  padding: 18px;
+
+  /* ✅ safe area */
+  padding: calc(18px + env(safe-area-inset-top)) 18px calc(18px + env(safe-area-inset-bottom)) 18px;
 }
 .modal[hidden]{ display:none !important; }
 
@@ -264,9 +265,9 @@ body{
   box-shadow: var(--shadow);
   overflow:hidden;
 
-  /* ✅ scala automatica anche sui modali */
+  /* ✅ IMPORTANTISSIMO: centro reale dei modali */
   transform: scale(var(--ui-scale));
-  transform-origin: top center;
+  transform-origin: center center;
 }
 
 .modalTop{
@@ -330,7 +331,7 @@ body.modal-open{ overflow:hidden; }
 .swapBtn strong{ display:block; font-size:12px; }
 .swapBtn span{ display:block; margin-top:6px; color:var(--muted); font-size:11px; }
 
-/* ✅ Colori bottoni OFFERTA */
+/* Colori bottoni OFFERTA */
 #offerAccept{
   background: rgba(54,211,153,.28);
   border-color: rgba(54,211,153,.55);
@@ -369,9 +370,7 @@ body.modal-open{ overflow:hidden; }
   cursor: pointer;
 }
 
-.zoomBtn.reset{
-  font-size: 16px;
-}
+.zoomBtn.reset{ font-size: 16px; }
 
 .zoomPct{
   min-width: 54px;
@@ -382,7 +381,7 @@ body.modal-open{ overflow:hidden; }
   font-size: 12px;
 }
 
-/* Manteniamo le regole già presenti (non collassiamo in 1 colonna) */
+/* Manteniamo 3 colonne anche sotto 980px (coerente con autoscale) */
 @media (max-width: 980px){
   .layout{ grid-template-columns: 1fr 1.6fr 1fr; }
   .caseGrid{ grid-template-columns: repeat(5, 1fr); }
