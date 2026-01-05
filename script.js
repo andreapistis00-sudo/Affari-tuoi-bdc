@@ -439,9 +439,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /* ===== MODAL: OFFERTA ===== */
   function showOfferModalMandatory(offer){
-    ui.offerModalValue.textContent = formatPoints(offer);
-    ui.offerModalSub.textContent = "Devi scegliere: accetta o rifiuta.";
-    openModal(ui.offerModal);
+  const idx = Math.max(0, Math.min(offer - 1, CONFIG.offerLabels.length - 1));
+  ui.offerModalValue.textContent = CONFIG.offerLabels[idx];
+  ui.offerModalSub.textContent = "Devi scegliere: accetta o rifiuta.";
+  openModal(ui.offerModal);
+}
+
   }
 
   function acceptOffer(){
