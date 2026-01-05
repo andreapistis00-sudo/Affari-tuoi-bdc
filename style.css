@@ -1,244 +1,389 @@
-<!DOCTYPE html>
-<html lang="it">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>IL GIOCO DEI PACCHI</title>
-    <link rel="stylesheet" href="style.css" />
-  </head>
+:root{
+  --bg: #0b1020;
+  --panel: rgba(255,255,255,.06);
+  --text: #eaf0ff;
+  --muted: rgba(234,240,255,.75);
+  --border: rgba(255,255,255,.12);
+  --shadow: 0 20px 60px rgba(0,0,0,.45);
+  --radius: 18px;
 
-  <body>
-    <div class="app">
-      <header class="topbar">
-        <div class="title">
-          <h1 id="gameTitle">IL GIOCO DEI PACCHI</h1>
-          <p id="subtitle">Scegli una località e prova a portarti a casa il premio migliore!</p>
-        </div>
-
-        <div class="status">
-          <div class="chip">
-            <span>Pacchi aperti</span>
-            <strong id="openedLabel">0</strong>
-          </div>
-          <div class="chip">
-            <span>Il tuo pacco</span>
-            <strong id="myCaseLabel">—</strong>
-          </div>
-        </div>
-      </header>
-
-      <main class="layout">
-        <section class="panel prizes">
-          <h2>Premi</h2>
-          <div class="prizeGrid" id="prizeGrid"></div>
-          <div class="legend">
-            <span class="dot dot-low"></span> basso
-            <span class="dot dot-mid"></span> medio
-            <span class="dot dot-high"></span> alto
-          </div>
-        </section>
-
-        <section class="panel board">
-          <div class="boardHeader">
-            <h2>Località</h2>
-            <div class="hint" id="hintText">Scegli la tua località (il tuo pacco).</div>
-          </div>
-
-          <div class="caseGrid" id="caseGrid"></div>
-
-          <div class="actions">
-            <button class="btn secondary" id="btnNew">Nuova partita</button>
-            <button class="btn secondary" id="btnSwap" disabled>Cambia pacco</button>
-
-            <!-- non usati (offerta obbligatoria via modal) -->
-            <button class="btn" id="btnOffer" disabled>Vedi Offerta</button>
-            <button class="btn danger" id="btnDeal" disabled>ACCETTA</button>
-            <button class="btn ghost" id="btnNoDeal" disabled>RIFIUTA</button>
-          </div>
-        </section>
-
-        <section class="panel offer">
-          <h2>Offerta</h2>
-
-          <div class="offerBox">
-            <div class="bankerRow">
-              <div class="bankerAvatar" aria-hidden="true">💼</div>
-              <div>
-                <div class="bankerName" id="bankerName">Il Banco</div>
-                <div class="bankerLine" id="bankerLine">Sei pronto per l’offerta?</div>
-              </div>
-            </div>
-
-            <div class="offerValue">
-              <div class="label">Ultima offerta</div>
-              <div class="value" id="offerValue">—</div>
-            </div>
-
-            <div class="offerMeta" id="offerMeta">
-              <div class="only">
-                <span>Pacchi rimasti</span><strong id="casesLeft">—</strong>
-              </div>
-            </div>
-          </div>
-
-          <div class="result" id="resultBox" hidden>
-            <h3 id="resultTitle">Risultato</h3>
-            <p id="resultText"></p>
-          </div>
-        </section>
-      </main>
-
-      <footer class="footer">
-        <span id="footerText">Grafica mantenuta • Offerta/Cambio a momenti scelti • Valore atteso rimosso</span>
-      </footer>
-    </div>
-
-    <!-- MODAL: SCEGLI IL TUO PACCO (obbligatorio) -->
-    <div class="modal" id="pickModal" hidden>
-      <div class="modalCard" role="dialog" aria-modal="true" aria-labelledby="pickTitle">
-        <div class="modalTop">
-          <div class="modalBadge" id="pickTitle">SCEGLI IL TUO PACCO</div>
-          <button class="modalClose" id="pickClose" aria-label="Chiudi">✕</button>
-        </div>
-
-        <div class="modalBody">
-          <div class="modalIcon" aria-hidden="true">📦</div>
-          <div class="modalPlace">Scegli una località come tuo pacco personale.</div>
-          <div class="modalSub">Clicca una località per iniziare.</div>
-
-          <div class="swapGrid" id="pickGrid"></div>
-        </div>
-
-        <div class="modalActions">
-          <button class="btn secondary" id="pickRandom">Scelta casuale</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- MODAL: PREMIO USCITO -->
-    <div class="modal" id="revealModal" hidden>
-      <div class="modalCard" role="dialog" aria-modal="true" aria-labelledby="revealTitle">
-        <div class="modalTop">
-          <div class="modalBadge" id="revealTitle">PREMIO USCITO</div>
-          <button class="modalClose" id="revealClose" aria-label="Chiudi">✕</button>
-        </div>
-
-        <div class="modalBody">
-          <div class="modalIcon" aria-hidden="true">🎁</div>
-          <div class="modalPlace" id="revealPlace">—</div>
-          <div class="modalPrize" id="revealPrize">—</div>
-          <div class="modalSub" id="revealSub">Continua ad aprire le località.</div>
-        </div>
-
-        <div class="modalActions">
-          <button class="btn" id="revealOk">OK, continua</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- MODAL: OFFERTA (obbligatorio) -->
-    <div class="modal" id="offerModal" hidden>
-      <div class="modalCard" role="dialog" aria-modal="true" aria-labelledby="offerTitle">
-        <div class="modalTop">
-          <div class="modalBadge" id="offerTitle">OFFERTA DEL BANCO</div>
-          <button class="modalClose" id="offerClose" aria-label="Chiudi">✕</button>
-        </div>
-
-        <div class="modalBody">
-          <div class="modalIcon" aria-hidden="true">💼</div>
-          <div class="modalPlace">Il Banco ti offre:</div>
-          <div class="modalPrize" id="offerModalValue">—</div>
-          <div class="modalSub" id="offerModalSub">Devi scegliere: accetta o rifiuta.</div>
-        </div>
-
-        <div class="modalActions two">
-          <button class="btn" id="offerAccept">ACCETTA L'OFFERTA</button>
-          <button class="btn" id="offerReject">RIFIUTA L'OFFERTA</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- MODAL: CAMBIO PACCO (obbligatorio) -->
-    <div class="modal" id="swapModal" hidden>
-      <div class="modalCard" role="dialog" aria-modal="true" aria-labelledby="swapTitle">
-        <div class="modalTop">
-          <div class="modalBadge" id="swapTitle">CAMBIO PACCO</div>
-          <button class="modalClose" id="swapClose" aria-label="Chiudi">✕</button>
-        </div>
-
-        <div class="modalBody">
-          <div class="modalIcon" aria-hidden="true">🔁</div>
-          <div class="modalPlace" id="swapMyCase">Il tuo pacco: —</div>
-          <div class="modalSub" id="swapSub">
-            Scegli un pacco con cui scambiare, oppure continua senza cambiare.
-          </div>
-          <div class="swapGrid" id="swapGrid"></div>
-        </div>
-
-        <div class="modalActions">
-          <button class="btn secondary" id="swapSkip">Continua senza cambiare</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Firebase PRIMA del tuo script -->
-    <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
-
-    <!-- Il tuo script UNA sola volta -->
-    <script src="script.js"></script>
-  </body>
-</html>
-/* ✅ MOBILE "VERO": ordine pannelli + tap-friendly */
-@media (max-width: 980px){
-
-  /* header più compatto */
-  .topbar{
-    flex-direction: column;
-    align-items: stretch;
-    gap: 12px;
-  }
-  .status{
-    justify-content: flex-start;
-  }
-  .chip{
-    min-width: 0;
-    flex: 1 1 auto;
-  }
-
-  /* ordine pannelli: gioco prima */
-  .board{ order: 1; }
-  .offer{ order: 2; }
-  .prizes{ order: 3; }
-
-  /* griglia pacchi più comoda */
-  .caseGrid{
-    gap: 10px;
-    grid-template-columns: repeat(3, 1fr);
-  }
-  .caseBtn{
-    min-height: 84px;
-    padding: 14px 10px;
-  }
-  .caseBtn .num{
-    font-size: 13px;
-  }
-  .caseBtn .small{
-    font-size: 11px;
-  }
-
-  /* azioni full-width */
-  .actions{
-    flex-direction: column;
-    gap: 10px;
-  }
-  .actions .btn{
-    width: 100%;
-  }
-
-  /* premi: area più bassa e scroll interna */
-  .prizeGrid{
-    max-height: 260px;
-  }
+  /* scala UI automatica (desktop fisso + autoscale) */
+  --ui-scale: 1;
 }
 
+*{ box-sizing:border-box; }
+html,body{ height:100%; }
+
+body{
+  margin:0;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+  background: radial-gradient(1200px 600px at 30% -10%, rgba(124,92,255,.35), transparent 60%),
+              radial-gradient(900px 700px at 110% 20%, rgba(54,211,153,.22), transparent 55%),
+              var(--bg);
+  color:var(--text);
+
+  overflow-x: hidden;
+
+  /* ✅ centratura stabile dell'app */
+  display:flex;
+  justify-content:center;
+  align-items:flex-start;
+}
+
+.app{
+  width: 1200px;
+  padding:18px;
+  margin: 0;
+
+  transform: scale(var(--ui-scale));
+  transform-origin: top center;
+}
+
+.topbar{
+  display:flex; gap:16px; align-items:flex-start; justify-content:space-between;
+  padding:16px; background:var(--panel); border:1px solid var(--border);
+  border-radius:var(--radius); box-shadow:var(--shadow);
+}
+
+.title h1{ margin:0; letter-spacing:.08em; font-size:22px; }
+.title p{ margin:6px 0 0; color:var(--muted); }
+
+.status{ display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end; }
+.chip{
+  min-width:180px;
+  padding:10px 12px;
+  border:1px solid var(--border);
+  border-radius:999px;
+  background:rgba(0,0,0,.18);
+  display:flex; justify-content:space-between; align-items:center; gap:10px;
+}
+.chip span{ color:var(--muted); font-size:12px; }
+.chip strong{ font-size:14px; }
+
+.layout{
+  margin-top:16px;
+  display:grid;
+  grid-template-columns: 1fr 1.6fr 1fr;
+  gap:16px;
+}
+
+.panel{
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  padding:14px;
+}
+.panel h2{ margin:0 0 10px; font-size:16px; }
+
+.prizeGrid{
+  display:grid;
+  grid-template-columns: 1fr;
+  gap:8px;
+  max-height:520px;
+  overflow:auto;
+  padding-right:6px;
+}
+.prizeItem{
+  display:flex; justify-content:space-between; align-items:center;
+  padding:10px 10px;
+  border-radius:14px;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.04);
+}
+.prizeItem.out{
+  opacity:.45;
+  text-decoration:line-through;
+  filter:saturate(.6);
+}
+.tag{
+  font-size:11px;
+  padding:4px 9px;
+  border-radius:999px;
+  border:1px solid var(--border);
+  color:var(--muted);
+}
+.tag.low{ border-color: rgba(54,211,153,.5); }
+.tag.mid{ border-color: rgba(251,191,36,.5); }
+.tag.high{ border-color: rgba(251,113,133,.5); }
+
+.legend{
+  margin-top:10px;
+  color:var(--muted);
+  display:flex; gap:12px; align-items:center; flex-wrap:wrap;
+  font-size:12px;
+}
+.dot{ width:10px; height:10px; border-radius:50%; display:inline-block; margin-right:6px; }
+.dot-low{ background: rgba(54,211,153,.9); }
+.dot-mid{ background: rgba(251,191,36,.9); }
+.dot-high{ background: rgba(251,113,133,.9); }
+
+.boardHeader{
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+}
+.hint{
+  color:var(--muted);
+  font-size:12px;
+  padding:8px 10px;
+  border-radius:999px;
+  border:1px solid var(--border);
+  background:rgba(0,0,0,.18);
+}
+
+.caseGrid{
+  margin-top:12px;
+  display:grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap:10px;
+}
+
+.caseBtn{
+  position:relative;
+  border-radius:18px;
+  border:1px solid var(--border);
+  background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.03));
+  color:var(--text);
+  padding:12px 10px;
+  cursor:pointer;
+  transition: transform .12s ease, opacity .12s ease;
+  min-height:70px;
+}
+.caseBtn:hover{ transform: translateY(-2px); }
+.caseBtn .num{ font-weight:800; font-size:12px; line-height:1.15; }
+.caseBtn .small{ display:block; color:var(--muted); font-size:11px; margin-top:6px; }
+.caseBtn.mine{
+  outline:2px solid rgba(124,92,255,.9);
+  box-shadow: 0 0 0 6px rgba(124,92,255,.18);
+}
+.caseBtn.opened{ opacity:.35; cursor:not-allowed; transform:none; }
+.caseBtn.opened::after{
+  content:"APERTO";
+  position:absolute;
+  inset:auto 10px 10px 10px;
+  font-size:10px;
+  letter-spacing:.12em;
+  color:rgba(234,240,255,.6);
+}
+
+.actions{ margin-top:12px; display:flex; gap:10px; flex-wrap:wrap; }
+
+.btn{
+  border:1px solid var(--border);
+  background: rgba(124,92,255,.35);
+  color:var(--text);
+  padding:10px 12px;
+  border-radius:14px;
+  cursor:pointer;
+  transition: transform .12s ease, opacity .12s ease;
+  font-weight:700;
+}
+.btn:hover{ transform: translateY(-1px); }
+.btn:disabled{ opacity:.4; cursor:not-allowed; transform:none; }
+.btn.secondary{ background: rgba(255,255,255,.08); }
+.btn.danger{ background: rgba(251,113,133,.22); }
+.btn.ghost{ background: transparent; }
+
+.offerBox{
+  border:1px solid var(--border);
+  border-radius:18px;
+  background: rgba(0,0,0,.18);
+  padding:12px;
+}
+.bankerRow{ display:flex; gap:10px; align-items:center; margin-bottom:10px; }
+.bankerAvatar{
+  width:44px; height:44px; border-radius:14px;
+  display:grid; place-items:center;
+  background: rgba(255,255,255,.08);
+  border:1px solid var(--border);
+  font-size:20px;
+}
+.bankerName{ font-weight:800; }
+.bankerLine{ color:var(--muted); font-size:12px; margin-top:2px; }
+
+.offerValue{
+  margin-top:12px;
+  padding:12px;
+  border-radius:16px;
+  border:1px solid var(--border);
+  background: rgba(255,255,255,.05);
+}
+.offerValue .label{ color:var(--muted); font-size:12px; }
+.offerValue .value{ font-size:28px; font-weight:900; margin-top:6px; }
+
+.offerMeta{
+  margin-top:10px;
+  display:grid;
+  grid-template-columns: 1fr 1fr;
+  gap:10px;
+}
+.offerMeta div{
+  padding:10px;
+  border-radius:16px;
+  border:1px solid var(--border);
+  background: rgba(255,255,255,.04);
+  display:flex; justify-content:space-between; align-items:center;
+}
+.offerMeta span{ color:var(--muted); font-size:12px; }
+.offerMeta .only{ grid-column: 1 / -1; }
+
+.result{
+  margin-top:12px;
+  padding:12px;
+  border-radius:18px;
+  border:1px solid var(--border);
+  background: rgba(54,211,153,.10);
+}
+.result p{ margin:0; color:var(--muted); white-space:pre-line; }
+
+.footer{
+  margin-top:16px;
+  color:rgba(234,240,255,.6);
+  font-size:12px;
+  text-align:center;
+}
+
+/* MODAL */
+.modal{
+  position:fixed;
+  inset:0;
+  display:grid;
+  place-items:center;
+  background: rgba(0,0,0,.55);
+  backdrop-filter: blur(6px);
+  z-index: 9999;
+
+  /* ✅ safe area */
+  padding: calc(18px + env(safe-area-inset-top)) 18px calc(18px + env(safe-area-inset-bottom)) 18px;
+}
+.modal[hidden]{ display:none !important; }
+
+.modalCard{
+  width:min(780px, 100%);
+  border-radius: 22px;
+  border: 1px solid var(--border);
+  background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(0,0,0,.25));
+  box-shadow: var(--shadow);
+  overflow:hidden;
+
+  /* ✅ IMPORTANTISSIMO: centro reale dei modali */
+  transform: scale(var(--ui-scale));
+  transform-origin: center center;
+}
+
+.modalTop{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding: 14px 14px 10px;
+}
+.modalBadge{
+  font-weight: 900;
+  letter-spacing:.14em;
+  font-size: 12px;
+  padding: 8px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: rgba(124,92,255,.22);
+}
+.modalClose{
+  border:1px solid var(--border);
+  background: rgba(255,255,255,.06);
+  color: var(--text);
+  width: 38px;
+  height: 38px;
+  border-radius: 14px;
+  cursor:pointer;
+  font-size: 16px;
+}
+.modalBody{ padding: 6px 18px 16px; text-align:center; }
+.modalIcon{ font-size: 44px; margin-top: 6px; }
+.modalPlace{ margin-top: 10px; font-size: 18px; font-weight: 900; }
+.modalPrize{ margin-top: 8px; font-size: 26px; font-weight: 950; }
+.modalSub{ margin-top: 10px; color: var(--muted); font-size: 12px; }
+.modalActions{
+  padding: 14px 18px 18px;
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
+.modalActions.two{ justify-content:space-between; }
+
+body.modal-open{ overflow:hidden; }
+
+.swapGrid{
+  margin-top: 14px;
+  display:grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  text-align:left;
+}
+.swapBtn{
+  border:1px solid var(--border);
+  background: rgba(255,255,255,.06);
+  color: var(--text);
+  border-radius: 16px;
+  padding: 10px 10px;
+  cursor:pointer;
+  transition: transform .12s ease, opacity .12s ease;
+}
+.swapBtn:hover{ transform: translateY(-1px); }
+.swapBtn strong{ display:block; font-size:12px; }
+.swapBtn span{ display:block; margin-top:6px; color:var(--muted); font-size:11px; }
+
+/* Colori bottoni OFFERTA */
+#offerAccept{
+  background: rgba(54,211,153,.28);
+  border-color: rgba(54,211,153,.55);
+}
+#offerReject{
+  background: rgba(251,113,133,.22);
+  border-color: rgba(251,113,133,.55);
+}
+
+/* Zoom controls */
+.zoomControls{
+  position: fixed;
+  right: 12px;
+  bottom: 12px;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 10px;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: rgba(0,0,0,.35);
+  backdrop-filter: blur(6px);
+}
+
+.zoomBtn{
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,.08);
+  color: var(--text);
+  font-weight: 900;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.zoomBtn.reset{ font-size: 16px; }
+
+.zoomPct{
+  min-width: 54px;
+  text-align: center;
+  font-weight: 800;
+  color: var(--text);
+  opacity: .9;
+  font-size: 12px;
+}
+
+/* Manteniamo 3 colonne anche sotto 980px (coerente con autoscale) */
+@media (max-width: 980px){
+  .layout{ grid-template-columns: 1fr 1.6fr 1fr; }
+  .caseGrid{ grid-template-columns: repeat(5, 1fr); }
+  .swapGrid{ grid-template-columns: repeat(3, 1fr); }
+}
