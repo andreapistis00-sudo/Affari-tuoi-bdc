@@ -128,18 +128,39 @@ document.addEventListener("DOMContentLoaded", () => {
   function renderOffer(v){ ui.offerValue.textContent=formatPoints(v); }
 
   /* ===== MODAL BASE ===== */
-  function openModal(modalEl){
-    modalEl.hidden = false;
-    document.body.classList.add("modal-open");
+    function openModal(modalEl){
+  scrollY = window.scrollY;
+
+  document.body.style.position = "fixed";
+  document.body.style.top = `-${scrollY}px`;
+  document.body.style.width = "100%";
+
+  modalEl.hidden = false;
+  document.body.classList.add("modal-open");
+}
+
   }
+  
   function closeModal(modalEl){
-    modalEl.hidden = true;
-    const anyOpen =
-      !ui.pickModal.hidden ||
-      !ui.revealModal.hidden ||
-      !ui.offerModal.hidden ||
-      !ui.swapModal.hidden;
-    if(!anyOpen) document.body.classList.remove("modal-open");
+  modalEl.hidden = true;
+
+  const anyOpen =
+    !ui.pickModal.hidden ||
+    !ui.revealModal.hidden ||
+    !ui.offerModal.hidden ||
+    !ui.swapModal.hidden;
+
+  if(!anyOpen){
+    document.body.classList.remove("modal-open");
+
+    document.body.style.position = "";
+    document.body.style.top = "";
+    document.body.style.width = "";
+
+    window.scrollTo(0, scrollY);
+  }
+}
+
   }
   function isAnyModalOpen(){
     return (
