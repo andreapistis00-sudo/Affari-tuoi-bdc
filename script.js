@@ -24,12 +24,10 @@ document.addEventListener("DOMContentLoaded", () => {
     // valori interni solo per calcolare l’offerta (non mostrati)
     prizeValues: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20],
 
-    // ✅ MOMENTI SCELTI DA TE
-    offerMoments: [5, 15],       // 1ª e 2ª offerta
-    swapMoments: [10],           // 1° cambio
-    finalSwapAtTwoLeft: true,    // 2° cambio quando restano 2 pacchi
+    offerMoments: [5, 15],
+    swapMoments: [10],
+    finalSwapAtTwoLeft: true,
 
-    // moltiplicatori per 1ª e 2ª offerta (puoi ritoccarli)
     offerMultipliers: [0.62, 0.82],
 
     maxSwaps: 2
@@ -37,6 +35,50 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let state = null;
   const $ = (id) => document.getElementById(id);
+
+  // Desktop fisso (1200px) + scala automatica + zoom manuale
+  let userZoom = Number(localStorage.getItem("userZoom") || "1");
+  function clamp(n, min, max){ return Math.max(min, Math.min(max, n)); }
+
+  function applyAutoScale(){
+    const baseWidth = 1200;
+
+    const w = Math.min(window.innerWidth, window.screen?.width || window.innerWidth);
+    const baseScale = w / baseWidth;
+
+    // scala finale = scala automatica * zoom utente
+    const finalScale = clamp(baseScale * userZoom, 0.55, 1.5);
+    document.documentElement.style.setProperty("--ui-scale", String(finalScale));
+
+    const pctEl = document.getElementById("zoomPct");
+    if(pctEl) pctEl.textContent = `${Math.round(userZoom * 100)}%`;
+  }
+
+  window.addEventListener("resize", applyAutoScale, { passive: true });
+  window.addEventListener("orientationchange", applyAutoScale, { passive: true });
+
+  document.addEventListener("click", (e) => {
+    const t = e.target;
+    if(!(t instanceof HTMLElement)) return;
+
+    if(t.id === "zoomIn"){
+      userZoom = clamp(userZoom + 0.1, 0.6, 2);
+      localStorage.setItem("userZoom", String(userZoom));
+      applyAutoScale();
+    }
+    if(t.id === "zoomOut"){
+      userZoom = clamp(userZoom - 0.1, 0.6, 2);
+      localStorage.setItem("userZoom", String(userZoom));
+      applyAutoScale();
+    }
+    if(t.id === "zoomReset"){
+      userZoom = 1;
+      localStorage.setItem("userZoom", String(userZoom));
+      applyAutoScale();
+    }
+  });
+
+  applyAutoScale();
 
   const ui = {
     title: $("gameTitle"),
@@ -64,13 +106,11 @@ document.addEventListener("DOMContentLoaded", () => {
     resultTitle: $("resultTitle"),
     resultText: $("resultText"),
 
-    // pick
     pickModal: $("pickModal"),
     pickGrid: $("pickGrid"),
     pickClose: $("pickClose"),
     pickRandom: $("pickRandom"),
 
-    // reveal
     revealModal: $("revealModal"),
     revealPlace: $("revealPlace"),
     revealPrize: $("revealPrize"),
@@ -78,7 +118,6 @@ document.addEventListener("DOMContentLoaded", () => {
     revealOk: $("revealOk"),
     revealClose: $("revealClose"),
 
-    // offer modal
     offerModal: $("offerModal"),
     offerModalValue: $("offerModalValue"),
     offerModalSub: $("offerModalSub"),
@@ -86,7 +125,6 @@ document.addEventListener("DOMContentLoaded", () => {
     offerReject: $("offerReject"),
     offerClose: $("offerClose"),
 
-    // swap
     swapModal: $("swapModal"),
     swapGrid: $("swapGrid"),
     swapMyCase: $("swapMyCase"),
@@ -206,12 +244,11 @@ document.addEventListener("DOMContentLoaded", () => {
     ui.myCaseLabel.textContent = state.myCaseId ? getCaseName(state.myCaseId) : "—";
     ui.casesLeft.textContent = String(remainingCaseIds().length);
 
-    // bottoni “vecchi” non usati
     ui.btnOffer.disabled = true;
     ui.btnDeal.disabled = true;
     ui.btnNoDeal.disabled = true;
 
-    ui.btnSwap.disabled = true; // swap obbligatorio via modal quando scatta
+    ui.btnSwap.disabled = true;
   }
 
   function renderAll(){
@@ -220,7 +257,7 @@ document.addEventListener("DOMContentLoaded", () => {
     renderCases();
   }
 
-  /* ===== MODAL: PICK (obbligatorio) ===== */
+  /* ===== MODAL: PICK ===== */
   function showPickModal(){
     ui.pickGrid.innerHTML = "";
     state.cases.slice().sort((a,b)=>a.id-b.id).forEach(c=>{
@@ -241,7 +278,6 @@ document.addEventListener("DOMContentLoaded", () => {
     renderAll();
   }
 
-  // scelta obbligatoria: non chiudiamo, diamo feedback
   ui.pickClose.addEventListener("click", () => {
     setHint("Devi scegliere una località per iniziare.");
   });
@@ -263,7 +299,6 @@ document.addEventListener("DOMContentLoaded", () => {
   function hideRevealModal(){
     closeModal(ui.revealModal);
 
-    // azioni obbligatorie “in coda”
     if(state.nextForced && state.nextForced.length){
       const next = state.nextForced.shift();
       if(next.type === "offer") showOfferModalMandatory(next.offer);
@@ -275,7 +310,7 @@ document.addEventListener("DOMContentLoaded", () => {
   ui.revealClose.addEventListener("click", hideRevealModal);
   ui.revealModal.addEventListener("click", (e)=>{ if(e.target===ui.revealModal) hideRevealModal(); });
 
-  /* ===== MODAL: SWAP (obbligatorio) ===== */
+  /* ===== MODAL: SWAP ===== */
   function showSwapModalMandatory(){
     if(state.swapsLeft <= 0) return;
 
@@ -323,7 +358,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  /* ===== MODAL: OFFERTA (obbligatorio) ===== */
+  /* ===== MODAL: OFFERTA ===== */
   function showOfferModalMandatory(offer){
     ui.offerModalValue.textContent = formatPoints(offer);
     ui.offerModalSub.textContent = "Devi scegliere: accetta o rifiuta.";
