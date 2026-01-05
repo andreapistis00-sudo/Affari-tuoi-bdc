@@ -1,40 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
-    // DEBUG mobile: mostra gli errori JS direttamente a schermo
-  (function () {
-    function show(msg) {
-      let box = document.getElementById("__errbox");
-      if (!box) {
-        box = document.createElement("pre");
-        box.id = "__errbox";
-        box.style.position = "fixed";
-        box.style.left = "8px";
-        box.style.right = "8px";
-        box.style.top = "8px";
-        box.style.zIndex = "999999";
-        box.style.maxHeight = "45vh";
-        box.style.overflow = "auto";
-        box.style.padding = "10px";
-        box.style.borderRadius = "12px";
-        box.style.border = "1px solid rgba(255,255,255,.25)";
-        box.style.background = "rgba(0,0,0,.85)";
-        box.style.color = "#fff";
-        box.style.fontSize = "12px";
-        box.style.whiteSpace = "pre-wrap";
-        document.body.appendChild(box);
-      }
-      box.textContent = String(msg);
-    }
-
-    window.addEventListener("error", (e) => {
-      show("JS ERROR:\n" + (e.message || "Errore") + "\n" + (e.filename || "") + ":" + (e.lineno || "") + ":" + (e.colno || ""));
-    });
-
-    window.addEventListener("unhandledrejection", (e) => {
-      show("PROMISE REJECTION:\n" + (e.reason && (e.reason.stack || e.reason.message) ? (e.reason.stack || e.reason.message) : String(e.reason)));
-    });
-  })();
-
-  const CONFIG = {
+    const CONFIG = {
     title: "AFFARI TUOI AL BDC",
     subtitle: "Scegli una località e prova a portarti a casa il premio migliore!",
     bankerName: "Il Banco",
