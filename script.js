@@ -10,6 +10,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     casesCount: 20,
 
+    // ✅ COOLDOWN: 40 secondi tra un pacco e l'altro
+    caseCooldownMs: 40000,
+
     caseNames: [
       "Girilonga","Coroddis","Su tauli","Corosa","Gennaguara",
       "Maricoxina","Niu Susu","Funtanedda De basciu","Barigau","Niu Sciossu",
@@ -25,27 +28,27 @@ document.addEventListener("DOMContentLoaded", () => {
     ],
     
     offerLabels: [
-  "Patatine piccole",
-  "Olive",
-  "Tramezzino",
-  "Toast",
-  "Panino",
-  "Piadina",
-  "Focaccia farcita",
-  "Bruschette",
-  "Mini pizza",
-  "Tagliere piccolo",
-  "Tagliere medio",
-  "Nachos con salsa",
-  "Dolce della casa",
-  "Tiramisù",
-  "Crostata",
-  "Affogato al caffè",
-  "Granita grande",
-  "Frullato",
-  "Degustazione stuzzichi",
-  "Apericena completa"
-],
+      "Patatine piccole",
+      "Olive",
+      "Tramezzino",
+      "Toast",
+      "Panino",
+      "Piadina",
+      "Focaccia farcita",
+      "Bruschette",
+      "Mini pizza",
+      "Tagliere piccolo",
+      "Tagliere medio",
+      "Nachos con salsa",
+      "Dolce della casa",
+      "Tiramisù",
+      "Crostata",
+      "Affogato al caffè",
+      "Granita grande",
+      "Frullato",
+      "Degustazione stuzzichi",
+      "Apericena completa"
+    ],
 
      // valori interni per offerta (non mostrati)
     prizeValues: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20],
@@ -154,11 +157,11 @@ document.addEventListener("DOMContentLoaded", () => {
   function setHint(t){ ui.hintText.textContent=t; }
   function setBankerLine(t){ ui.bankerLine.textContent=t; }
   function renderOffer(v){
-  if (v == null) return;
+    if (v == null) return;
 
-  const idx = Math.max(0, Math.min(v - 1, CONFIG.offerLabels.length - 1));
-  ui.offerValue.textContent = CONFIG.offerLabels[idx];
-}
+    const idx = Math.max(0, Math.min(v - 1, CONFIG.offerLabels.length - 1));
+    ui.offerValue.textContent = CONFIG.offerLabels[idx];
+  }
 
 
   /* ===== MODAL BASE (lock scroll) ===== */
@@ -439,11 +442,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   /* ===== MODAL: OFFERTA ===== */
   function showOfferModalMandatory(offer){
-  const idx = Math.max(0, Math.min(offer - 1, CONFIG.offerLabels.length - 1));
-  ui.offerModalValue.textContent = CONFIG.offerLabels[idx];
-  ui.offerModalSub.textContent = "Devi scegliere: accetta o rifiuta.";
-  openModal(ui.offerModal);
-}
+    const idx = Math.max(0, Math.min(offer - 1, CONFIG.offerLabels.length - 1));
+    ui.offerModalValue.textContent = CONFIG.offerLabels[idx];
+    ui.offerModalSub.textContent = "Devi scegliere: accetta o rifiuta.";
+    openModal(ui.offerModal);
+  }
 
 
   function acceptOffer(){
@@ -527,6 +530,14 @@ document.addEventListener("DOMContentLoaded", () => {
     if(state.phase === "ended") return;
     if(isAnyModalOpen()) return;
 
+    // ✅ COOLDOWN: blocca apertura pacco finché non passano 40 secondi
+    const now = Date.now();
+    if (now < state.nextCaseOpenAt) {
+      const sec = Math.ceil((state.nextCaseOpenAt - now) / 1000);
+      setHint(`Aspetta ${sec}s prima di aprire il prossimo pacco.`);
+      return;
+    }
+
     // ✅ blocco totale finché non sbloccato
     if(!state.access.unlocked){
       openPinGate();
@@ -547,6 +558,10 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     c.opened = true;
+
+    // ✅ COOLDOWN: avvia timer dopo aver aperto un pacco
+    state.nextCaseOpenAt = Date.now() + CONFIG.caseCooldownMs;
+
     state.removedPrizeIds.add(c.prizeId);
     state.openedCount += 1;
 
@@ -617,6 +632,9 @@ document.addEventListener("DOMContentLoaded", () => {
       phase: "playing",
       myCaseId: null,
       lastOffer: null,
+
+      // ✅ COOLDOWN: timestamp (ms) da cui è consentito aprire il prossimo pacco
+      nextCaseOpenAt: 0,
 
       openedCount: 0,
       offersMade: 0,
