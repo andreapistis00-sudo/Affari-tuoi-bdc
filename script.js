@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
     bankerName: "Il Banco",
     currency: "punti",
 
-    // ✅ PIN: cambialo qui
+    // ✅ PIN locale
     accessPin: "4827",
 
     casesCount: 20,
@@ -24,6 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
       "Premio 16","Premio 17","Premio 18","Premio 19","Premio 20"
     ],
 
+    // valori interni per offerta (non mostrati)
     prizeValues: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20],
 
     offerMoments: [5, 15],
@@ -33,6 +34,7 @@ document.addEventListener("DOMContentLoaded", () => {
     maxSwaps: 2
   };
 
+  // ✅ Persistenza partita (localStorage)
   const STORAGE_KEY = "paccoGameState_v1";
   const CONFIG_SIGNATURE = JSON.stringify({
     casesCount: CONFIG.casesCount,
@@ -49,9 +51,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let state = null;
   let scrollY = 0;
-
-  // ✅ sblocco SOLO di sessione (NON salvato)
-  let sessionUnlocked = false;
 
   const $ = (id) => document.getElementById(id);
 
@@ -81,7 +80,7 @@ document.addEventListener("DOMContentLoaded", () => {
     resultTitle: $("resultTitle"),
     resultText: $("resultText"),
 
-    // PIN
+    // PIN modal
     pinModal: $("pinModal"),
     pinInput: $("pinInput"),
     pinSubmit: $("pinSubmit"),
@@ -118,6 +117,7 @@ document.addEventListener("DOMContentLoaded", () => {
     swapClose: $("swapClose")
   };
 
+  /* ===== UTIL ===== */
   function shuffle(arr){
     const a = [...arr];
     for (let i=a.length-1;i>0;i--){
@@ -147,6 +147,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function setBankerLine(t){ ui.bankerLine.textContent=t; }
   function renderOffer(v){ ui.offerValue.textContent=formatPoints(v); }
 
+  /* ===== PERSISTENZA ===== */
   function serializeState(s){
     return {
       __sig: CONFIG_SIGNATURE,
@@ -165,6 +166,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
       allPrizes: s.allPrizes,
       removedPrizeIds: Array.from(s.removedPrizeIds || []),
+
+      access: s.access || { unlocked: false },
 
       cases: s.cases
     };
@@ -190,6 +193,8 @@ document.addEventListener("DOMContentLoaded", () => {
       allPrizes: Array.isArray(obj.allPrizes) ? obj.allPrizes : [],
       removedPrizeIds: new Set(obj.removedPrizeIds || []),
 
+      access: obj.access || { unlocked: false },
+
       cases: Array.isArray(obj.cases) ? obj.cases : []
     };
 
@@ -200,7 +205,9 @@ document.addEventListener("DOMContentLoaded", () => {
   function saveGame(){
     try{
       localStorage.setItem(STORAGE_KEY, JSON.stringify(serializeState(state)));
-    }catch(e){}
+    }catch(e){
+      // storage pieno o disabilitato: continua comunque
+    }
   }
 
   function loadGame(){
@@ -218,11 +225,14 @@ document.addEventListener("DOMContentLoaded", () => {
     try{ localStorage.removeItem(STORAGE_KEY); }catch(e){}
   }
 
+  /* ===== MODAL BASE (lock scroll) ===== */
   function openModal(modalEl){
     scrollY = window.scrollY;
+
     document.body.style.position = "fixed";
     document.body.style.top = `-${scrollY}px`;
     document.body.style.width = "100%";
+
     modalEl.hidden = false;
     document.body.classList.add("modal-open");
   }
@@ -239,9 +249,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if(!anyOpen){
       document.body.classList.remove("modal-open");
+
       document.body.style.position = "";
       document.body.style.top = "";
       document.body.style.width = "";
+
       window.scrollTo(0, scrollY);
     }
   }
@@ -256,21 +268,38 @@ document.addEventListener("DOMContentLoaded", () => {
     );
   }
 
-  // ===== PIN =====
+  /* ===== PIN GATE ===== */
   function showPinError(msg){
     ui.pinError.hidden = !msg;
     ui.pinError.textContent = msg || "";
   }
 
   function openPinGate(){
-    sessionUnlocked = false;
     showPinError("");
     ui.pinInput.value = "";
     ui.pinSubmit.disabled = false;
     openModal(ui.pinModal);
+
     setBankerLine("Inserisci il PIN per giocare.");
     setHint("Inserisci il PIN per iniziare.");
-    setTimeout(()=>ui.pinInput && ui.pinInput.focus(), 80);
+    setTimeout(()=>ui.pinInput && ui.pinInput.focus(), 50);
+  }
+
+  function unlockGame(){
+    state.access.unlocked = true;
+    saveGame();
+
+    closeModal(ui.pinModal);
+
+    setBankerLine("Accesso OK.");
+    if(!state.myCaseId){
+      setHint("Scegli la tua località (il tuo pacco).");
+      renderAll();
+      showPickModal();
+    }else{
+      setHint("Continua la partita.");
+      renderAll();
+    }
   }
 
   function handlePinSubmit(){
@@ -292,29 +321,19 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     showPinError("");
-    sessionUnlocked = true;
-    closeModal(ui.pinModal);
-
-    setBankerLine("Accesso OK.");
-    if(!state.myCaseId && state.phase !== "ended"){
-      setHint("Scegli la tua località (il tuo pacco).");
-      showPickModal();
-    }else{
-      setHint("Continua ad aprire le località.");
-    }
-    renderAll();
+    unlockGame();
   }
 
   ui.pinSubmit.addEventListener("click", handlePinSubmit);
-  ui.pinInput.addEventListener("keydown", (e)=>{ if(e.key === "Enter") handlePinSubmit(); });
-
-  ui.pinModal.addEventListener("click", (e)=>{
-    if(e.target === ui.pinModal){
-      showPinError("Accesso obbligatorio: inserisci il PIN.");
-    }
+  ui.pinInput.addEventListener("keydown", (e)=>{
+    if(e.key === "Enter") handlePinSubmit();
   });
 
-  // ===== RENDER =====
+  ui.pinModal.addEventListener("click", (e)=>{
+    if(e.target === ui.pinModal) showPinError("Accesso obbligatorio: inserisci il PIN.");
+  });
+
+  /* ===== RENDER ===== */
   function prizeTierByValue(v){
     const sorted=[...CONFIG.prizeValues].sort((a,b)=>a-b);
     const p33=sorted[Math.floor(sorted.length*0.33)];
@@ -357,6 +376,7 @@ document.addEventListener("DOMContentLoaded", () => {
         <div class="num">${getCaseName(c.id)}</div>
         <span class="small">${c.opened ? "—" : "clicca"}</span>
       `;
+
       btn.addEventListener("click", ()=>onCaseClick(c.id));
       ui.caseGrid.appendChild(btn);
     });
@@ -374,6 +394,7 @@ document.addEventListener("DOMContentLoaded", () => {
     ui.btnOffer.disabled = true;
     ui.btnDeal.disabled = true;
     ui.btnNoDeal.disabled = true;
+
     ui.btnSwap.disabled = true;
   }
 
@@ -383,7 +404,7 @@ document.addEventListener("DOMContentLoaded", () => {
     renderCases();
   }
 
-  // ===== PICK MODAL =====
+  /* ===== MODAL: PICK ===== */
   function showPickModal(){
     ui.pickGrid.innerHTML = "";
     state.cases.slice().sort((a,b)=>a.id-b.id).forEach(c=>{
@@ -399,20 +420,25 @@ document.addEventListener("DOMContentLoaded", () => {
   function pickMyCase(id){
     state.myCaseId = id;
     saveGame();
+
     closeModal(ui.pickModal);
     setBankerLine("Perfetto. Inizia ad aprire le località!");
     setHint("Apri una località.");
     renderAll();
   }
 
-  ui.pickClose.addEventListener("click", () => setHint("Devi scegliere una località per iniziare."));
-  ui.pickModal.addEventListener("click", (e)=>{ if(e.target===ui.pickModal) setHint("Devi scegliere una località per iniziare."); });
+  ui.pickClose.addEventListener("click", () => {
+    setHint("Devi scegliere una località per iniziare.");
+  });
+  ui.pickModal.addEventListener("click", (e)=>{
+    if(e.target===ui.pickModal) setHint("Devi scegliere una località per iniziare.");
+  });
   ui.pickRandom.addEventListener("click", ()=>{
     const ids = state.cases.map(c=>c.id);
     pickMyCase(ids[Math.floor(Math.random()*ids.length)]);
   });
 
-  // ===== REVEAL MODAL =====
+  /* ===== MODAL: REVEAL ===== */
   function showRevealModal(placeName, prizeLabel, subText){
     ui.revealPlace.textContent = placeName;
     ui.revealPrize.textContent = prizeLabel;
@@ -435,7 +461,7 @@ document.addEventListener("DOMContentLoaded", () => {
   ui.revealClose.addEventListener("click", hideRevealModal);
   ui.revealModal.addEventListener("click", (e)=>{ if(e.target===ui.revealModal) hideRevealModal(); });
 
-  // ===== SWAP MODAL =====
+  /* ===== MODAL: SWAP ===== */
   function showSwapModalMandatory(){
     if(state.swapsLeft <= 0) return;
 
@@ -484,7 +510,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // ===== OFFER MODAL =====
+  /* ===== MODAL: OFFERTA ===== */
   function showOfferModalMandatory(offer){
     ui.offerModalValue.textContent = formatPoints(offer);
     ui.offerModalSub.textContent = "Devi scegliere: accetta o rifiuta.";
@@ -527,7 +553,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if(!ui.revealModal.hidden) hideRevealModal();
   });
 
-  // ===== LOGICA OFFERTA =====
+  /* ===== LOGICA: OFFERTA ===== */
   function computeOffer(){
     const ev = computeEV();
     const idx = Math.min(state.offersMade, CONFIG.offerMultipliers.length - 1);
@@ -571,13 +597,13 @@ document.addEventListener("DOMContentLoaded", () => {
     saveGame();
   }
 
-  // ✅ QUI IL FIX: non sceglie mai il pacco da solo
+  /* ===== CLICK PACCHI ===== */
   function onCaseClick(id){
     if(state.phase === "ended") return;
     if(isAnyModalOpen()) return;
 
-    // PIN obbligatorio ad ogni apertura/refresh
-    if(!sessionUnlocked){
+    // blocco finché non sbloccato
+    if(!state.access.unlocked){
       openPinGate();
       return;
     }
@@ -585,10 +611,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const c = state.cases.find(x=>x.id===id);
     if(!c || c.opened) return;
 
-    // ✅ se non hai scelto il tuo pacco -> apri sempre pickModal (obbligatorio)
     if(!state.myCaseId){
-      showPickModal();
-      setHint("Scegli la tua località (il tuo pacco).");
+      pickMyCase(id);
       return;
     }
 
@@ -603,6 +627,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const remaining = remainingCaseIds().length;
 
+    // fine naturale quando resta solo il tuo pacco
     if(remaining === 1){
       const my = state.cases.find(x=>x.id===state.myCaseId);
 
@@ -645,6 +670,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  /* ===== AVVIO / NUOVA PARTITA ===== */
   function newGame(){
     const ok =
       CONFIG.casesCount === CONFIG.caseNames.length &&
@@ -681,6 +707,8 @@ document.addEventListener("DOMContentLoaded", () => {
       allPrizes,
       removedPrizeIds: new Set(),
 
+      access: { unlocked: false },
+
       cases: Array.from({length:CONFIG.casesCount}, (_,i)=>({
         id:i+1,
         prizeId: shuffled[i].id,
@@ -703,17 +731,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
     saveGame();
     renderAll();
-
-    // PIN sempre obbligatorio
     openPinGate();
   }
 
   ui.btnNew.addEventListener("click", () => {
+    // Nuova partita = reset totale (anche salvataggio)
     clearSavedGame();
     newGame();
   });
   ui.btnSwap.addEventListener("click", () => {});
 
+  /* ===== BOOT: prova a riprendere partita ===== */
   function boot(){
     const saved = loadGame();
     if(saved){
@@ -725,12 +753,22 @@ document.addEventListener("DOMContentLoaded", () => {
       closeModal(ui.pickModal);
 
       ui.resultBox.hidden = (state.phase !== "ended");
+      if(state.phase === "ended"){
+        setBankerLine("Partita finita.");
+        setHint("Fine partita.");
+      }else{
+        setBankerLine("Partita ripresa.");
+        setHint("Continua ad aprire le località.");
+      }
 
       renderOffer(state.lastOffer);
       renderAll();
 
-      // ✅ PIN sempre richiesto anche se la partita è in corso
-      openPinGate();
+      if(!state.access.unlocked){
+        openPinGate();
+      }else if(!state.myCaseId && state.phase !== "ended"){
+        showPickModal();
+      }
       return;
     }
 
@@ -739,8 +777,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   boot();
 
+  /* ===== PROTEZIONE USCITA PAGINA (popup di sistema) ===== */
   window.addEventListener("beforeunload", (e) => {
     if (!state) return;
+
+    // Mostra popup solo se la partita è in corso
     if (state.phase !== "ended") {
       e.preventDefault();
       e.returnValue = "";
