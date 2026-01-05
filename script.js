@@ -147,6 +147,36 @@ document.addEventListener("DOMContentLoaded", () => {
   function setBankerLine(t){ ui.bankerLine.textContent=t; }
   function renderOffer(v){ ui.offerValue.textContent=formatPoints(v); }
 
+  /* ===== TV FX ===== */
+  function modalCardOf(modalEl){
+    if(!modalEl) return null;
+    return modalEl.querySelector(".modalCard");
+  }
+
+  function animateModalEnter(modalEl){
+    const card = modalCardOf(modalEl);
+    if(!card) return;
+    card.classList.remove("tvEnter");
+    // reflow
+    void card.offsetWidth;
+    card.classList.add("tvEnter");
+  }
+
+  function shakeModal(modalEl){
+    const card = modalCardOf(modalEl);
+    if(!card) return;
+    card.classList.remove("shake");
+    void card.offsetWidth;
+    card.classList.add("shake");
+  }
+
+  function pulseEl(el){
+    if(!el) return;
+    el.classList.remove("tvPulse");
+    void el.offsetWidth;
+    el.classList.add("tvPulse");
+  }
+
   /* ===== PERSISTENZA ===== */
   function serializeState(s){
     return {
@@ -205,9 +235,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function saveGame(){
     try{
       localStorage.setItem(STORAGE_KEY, JSON.stringify(serializeState(state)));
-    }catch(e){
-      // storage pieno o disabilitato: continua comunque
-    }
+    }catch(e){}
   }
 
   function loadGame(){
@@ -235,6 +263,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     modalEl.hidden = false;
     document.body.classList.add("modal-open");
+    animateModalEnter(modalEl);
   }
 
   function closeModal(modalEl){
@@ -282,7 +311,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     setBankerLine("Inserisci il PIN per giocare.");
     setHint("Inserisci il PIN per iniziare.");
-    setTimeout(()=>ui.pinInput && ui.pinInput.focus(), 50);
+    setTimeout(()=>ui.pinInput && ui.pinInput.focus(), 80);
   }
 
   function unlockGame(){
@@ -307,6 +336,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if(!pin){
       showPinError("Inserisci il PIN.");
+      shakeModal(ui.pinModal);
       return;
     }
 
@@ -314,6 +344,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if(pin !== CONFIG.accessPin){
       showPinError("PIN errato.");
+      shakeModal(ui.pinModal);
       ui.pinSubmit.disabled = false;
       ui.pinInput.focus();
       ui.pinInput.select?.();
@@ -330,7 +361,10 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   ui.pinModal.addEventListener("click", (e)=>{
-    if(e.target === ui.pinModal) showPinError("Accesso obbligatorio: inserisci il PIN.");
+    if(e.target === ui.pinModal){
+      showPinError("Accesso obbligatorio: inserisci il PIN.");
+      shakeModal(ui.pinModal);
+    }
   });
 
   /* ===== RENDER ===== */
@@ -429,9 +463,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
   ui.pickClose.addEventListener("click", () => {
     setHint("Devi scegliere una località per iniziare.");
+    shakeModal(ui.pickModal);
   });
   ui.pickModal.addEventListener("click", (e)=>{
-    if(e.target===ui.pickModal) setHint("Devi scegliere una località per iniziare.");
+    if(e.target===ui.pickModal){
+      setHint("Devi scegliere una località per iniziare.");
+      shakeModal(ui.pickModal);
+    }
   });
   ui.pickRandom.addEventListener("click", ()=>{
     const ids = state.cases.map(c=>c.id);
@@ -507,6 +545,7 @@ document.addEventListener("DOMContentLoaded", () => {
   ui.swapModal.addEventListener("click", (e) => {
     if (e.target === ui.swapModal) {
       ui.swapSub.textContent = "Devi scegliere un pacco oppure premere 'Continua senza cambiare'.";
+      shakeModal(ui.swapModal);
     }
   });
 
@@ -515,6 +554,7 @@ document.addEventListener("DOMContentLoaded", () => {
     ui.offerModalValue.textContent = formatPoints(offer);
     ui.offerModalSub.textContent = "Devi scegliere: accetta o rifiuta.";
     openModal(ui.offerModal);
+    pulseEl(ui.offerModalValue);
   }
 
   function acceptOffer(){
@@ -545,8 +585,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   ui.offerAccept.addEventListener("click", acceptOffer);
   ui.offerReject.addEventListener("click", rejectOffer);
-  ui.offerClose.addEventListener("click", () => setHint("Devi scegliere: ACCETTA o RIFIUTA l’offerta."));
-  ui.offerModal.addEventListener("click", (e)=>{ if(e.target===ui.offerModal) setHint("Devi scegliere: ACCETTA o RIFIUTA l’offerta."); });
+  ui.offerClose.addEventListener("click", () => {
+    setHint("Devi scegliere: ACCETTA o RIFIUTA l’offerta.");
+    shakeModal(ui.offerModal);
+  });
+  ui.offerModal.addEventListener("click", (e)=>{ if(e.target===ui.offerModal){ setHint("Devi scegliere: ACCETTA o RIFIUTA l’offerta."); shakeModal(ui.offerModal); } });
 
   document.addEventListener("keydown", (e)=>{
     if(e.key !== "Escape") return;
@@ -735,7 +778,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   ui.btnNew.addEventListener("click", () => {
-    // Nuova partita = reset totale (anche salvataggio)
     clearSavedGame();
     newGame();
   });
@@ -780,8 +822,6 @@ document.addEventListener("DOMContentLoaded", () => {
   /* ===== PROTEZIONE USCITA PAGINA (popup di sistema) ===== */
   window.addEventListener("beforeunload", (e) => {
     if (!state) return;
-
-    // Mostra popup solo se la partita è in corso
     if (state.phase !== "ended") {
       e.preventDefault();
       e.returnValue = "";
