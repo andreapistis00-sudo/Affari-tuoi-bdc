@@ -241,6 +241,9 @@ body{
   backdrop-filter: blur(6px);
   z-index: 9999;
   padding: 18px;
+    overflow: auto;
+  -webkit-overflow-scrolling: touch;
+
 }
 .modal[hidden]{ display:none !important; }
 
