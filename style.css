@@ -260,6 +260,14 @@ body{
 }
 
 }
+.modalBody{
+  padding: 6px 18px 16px;
+  text-align: center;
+
+  flex: 1 1 auto;              /* ← fondamentale */
+  overflow-y: auto;            /* ← scroll interno */
+  -webkit-overflow-scrolling: touch;
+}
 
 
 }
@@ -288,7 +296,7 @@ body{
   cursor:pointer;
   font-size: 16px;
 }
-.modalBody{ padding: 6px 18px 16px; text-align:center; }
+
 .modalIcon{ font-size: 44px; margin-top: 6px; }
 .modalPlace{ margin-top: 10px; font-size: 18px; font-weight: 900; }
 .modalPrize{ margin-top: 8px; font-size: 26px; font-weight: 950; }
@@ -299,8 +307,7 @@ body{
   justify-content:center;
   gap:10px;
   flex-wrap:wrap;
-  .modalBody{
-  overflow-y: auto;
+  ;
   -webkit-overflow-scrolling: touch;
 }
 
@@ -386,7 +393,7 @@ body.modal-open{ overflow:hidden; }
 
   /* modali su mobile: un po' più larghi e scrollabili */
   .modalCard{ width: min(560px, 100%); }
-  .modalBody{ padding: 10px 14px 14px; }
+  
   .swapGrid{ grid-template-columns: repeat(2, 1fr); }
 }
 
@@ -406,8 +413,7 @@ body.modal-open{ overflow:hidden; }
     flex-direction: column;
   }
 
-  .modalBody{
-    overflow: auto;
+  
     -webkit-overflow-scrolling: touch;
   }
 
