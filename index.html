@@ -41,7 +41,7 @@
         <section class="panel board">
           <div class="boardHeader">
             <h2>Località</h2>
-            <div class="hint" id="hintText">Scegli la tua località (il tuo pacco).</div>
+            <div class="hint" id="hintText">Inserisci il PIN per iniziare.</div>
           </div>
 
           <div class="caseGrid" id="caseGrid"></div>
@@ -65,7 +65,7 @@
               <div class="bankerAvatar" aria-hidden="true">💼</div>
               <div>
                 <div class="bankerName" id="bankerName">Il Banco</div>
-                <div class="bankerLine" id="bankerLine">Sei pronto per l’offerta?</div>
+                <div class="bankerLine" id="bankerLine">Inserisci il PIN per giocare.</div>
               </div>
             </div>
 
@@ -89,8 +89,40 @@
       </main>
 
       <footer class="footer">
-        <span id="footerText">Grafica mantenuta • Offerta/Cambio a momenti scelti</span>
+        <span id="footerText">Grafica mantenuta • Accesso con PIN obbligatorio</span>
       </footer>
+    </div>
+
+    <!-- MODAL: LOGIN PIN (obbligatorio) -->
+    <div class="modal" id="pinModal" hidden>
+      <div class="modalCard" role="dialog" aria-modal="true" aria-labelledby="pinTitle">
+        <div class="modalTop">
+          <div class="modalBadge" id="pinTitle">ACCESSO</div>
+          <!-- niente X: accesso obbligatorio -->
+          <div style="width:38px;height:38px;" aria-hidden="true"></div>
+        </div>
+
+        <div class="modalBody">
+          <div class="modalIcon" aria-hidden="true">🔒</div>
+          <div class="modalPlace">Inserisci il PIN per giocare</div>
+          <div class="modalSub">Il gioco si avvia solo dopo l’accesso.</div>
+
+          <div class="accessForm">
+            <input
+              id="pinInput"
+              class="accessInput"
+              type="password"
+              inputmode="numeric"
+              autocomplete="one-time-code"
+              placeholder="PIN"
+              maxlength="8"
+            />
+            <button class="btn" id="pinSubmit">ENTRA</button>
+          </div>
+
+          <div class="accessError" id="pinError" hidden></div>
+        </div>
+      </div>
     </div>
 
     <!-- MODAL: SCEGLI IL TUO PACCO (obbligatorio) -->
