@@ -38,6 +38,17 @@ document.addEventListener("DOMContentLoaded", () => {
   let state = null;
   const $ = (id) => document.getElementById(id);
 
+  /* ✅ Desktop fisso (1200px) + scala automatica su schermi piccoli */
+  function applyAutoScale(){
+    const baseWidth = 1200;
+    const w = Math.min(window.innerWidth, window.screen?.width || window.innerWidth);
+    const scale = Math.min(1, w / baseWidth);
+    document.documentElement.style.setProperty("--ui-scale", String(scale));
+  }
+  window.addEventListener("resize", applyAutoScale, { passive: true });
+  window.addEventListener("orientationchange", applyAutoScale, { passive: true });
+  applyAutoScale();
+
   const ui = {
     title: $("gameTitle"),
     subtitle: $("subtitle"),
