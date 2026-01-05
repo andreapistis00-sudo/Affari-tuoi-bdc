@@ -330,9 +330,9 @@ body.modal-open{ overflow:hidden; }
 /* Mobile: mantieni layout desktop e scala l'intera app */
 @media (max-width: 520px){
   .app{
-    transform: scale(.70);
+    transform: scale(.60);
     transform-origin: top center;
-    width: calc(100% / .70);
+    width: calc(100% / .60);
   }
 }
   }
@@ -340,9 +340,9 @@ body.modal-open{ overflow:hidden; }
 @media (max-width: 520px){
   /* Scala anche i modali (sono fuori da .app) */
   .modalCard{
-    transform: scale(.70);
+    transform: scale(.60);
     transform-origin: top center;
-    width: calc(100% / .70);
+    width: calc(100% / .60);
   }
 }
 
