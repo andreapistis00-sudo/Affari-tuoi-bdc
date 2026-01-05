@@ -6,6 +6,9 @@
   --border: rgba(255,255,255,.12);
   --shadow: 0 20px 60px rgba(0,0,0,.45);
   --radius: 18px;
+
+  /* ✅ scala UI automatica (desktop fisso + autoscale) */
+  --ui-scale: 1;
 }
 
 *{ box-sizing:border-box; }
@@ -19,7 +22,15 @@ body{
   color:var(--text);
 }
 
-.app{ max-width:1200px; margin:0 auto; padding:18px; }
+/* ✅ Desktop base fisso 1200px + scala automatica */
+.app{
+  width: 1200px;
+  margin: 0 auto;
+  padding:18px;
+
+  transform: scale(var(--ui-scale));
+  transform-origin: top center;
+}
 
 .topbar{
   display:flex; gap:16px; align-items:flex-start; justify-content:space-between;
@@ -245,7 +256,12 @@ body{
   background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(0,0,0,.25));
   box-shadow: var(--shadow);
   overflow:hidden;
+
+  /* ✅ scala automatica anche sui modali */
+  transform: scale(var(--ui-scale));
+  transform-origin: top center;
 }
+
 .modalTop{
   display:flex;
   align-items:center;
@@ -317,33 +333,9 @@ body.modal-open{ overflow:hidden; }
   border-color: rgba(251,113,133,.55);
 }
 
+/* Manteniamo le regole già presenti (non collassiamo in 1 colonna) */
 @media (max-width: 980px){
-  /* Mantieni la struttura “desktop” anche su mobile */
-  .layout{
-    grid-template-columns: 1fr 1.6fr 1fr;
-  }
-
-  /* Griglie come desktop */
+  .layout{ grid-template-columns: 1fr 1.6fr 1fr; }
   .caseGrid{ grid-template-columns: repeat(5, 1fr); }
   .swapGrid{ grid-template-columns: repeat(3, 1fr); }
-}
-/* Mobile: mantieni layout desktop e scala l'intera app */
-@media (max-width: 520px){
-  .app{
-    transform: scale(.60);
-    transform-origin: top center;
-    width: calc(100% / .60);
-  }
-}
-  }
-}
-@media (max-width: 520px){
-  /* Scala anche i modali (sono fuori da .app) */
-  .modalCard{
-    transform: scale(.60);
-    transform-origin: top center;
-    width: calc(100% / .60);
-  }
-}
-
 }
