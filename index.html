@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AFFARI TUOI AL BDC</title>
+    <title>IL GIOCO DEI PACCHI</title>
     <link rel="stylesheet" href="style.css" />
   </head>
 
@@ -11,7 +11,7 @@
     <div class="app">
       <header class="topbar">
         <div class="title">
-          <h1 id="gameTitle">AFFARI TUOI AL BDC</h1>
+          <h1 id="gameTitle">IL GIOCO DEI PACCHI</h1>
           <p id="subtitle">Scegli una località e prova a portarti a casa il premio migliore!</p>
         </div>
 
@@ -181,11 +181,42 @@
       </div>
     </div>
 
+    <!-- MODAL: ACCESSO CON CODICE (obbligatorio) -->
+    <div class="modal" id="accessModal" hidden>
+      <div class="modalCard" role="dialog" aria-modal="true" aria-labelledby="accessTitle">
+        <div class="modalTop">
+          <div class="modalBadge" id="accessTitle">INSERISCI CODICE</div>
+          <button class="modalClose" id="accessClose" aria-label="Chiudi">✕</button>
+        </div>
+
+        <div class="modalBody">
+          <div class="modalIcon" aria-hidden="true">🔒</div>
+          <div class="modalPlace">Per giocare serve un codice valido.</div>
+          <div class="modalSub">Chiedi allo staff il codice dopo il pagamento.</div>
+
+          <div class="accessForm">
+            <input
+              id="accessCodeInput"
+              class="accessInput"
+              type="text"
+              inputmode="text"
+              autocomplete="one-time-code"
+              placeholder="Es. AB12C"
+              maxlength="12"
+            />
+            <button class="btn" id="accessSubmit">SBLOCCA</button>
+          </div>
+
+          <div class="accessError" id="accessError" hidden></div>
+        </div>
+      </div>
+    </div>
+
     <!-- Firebase PRIMA del tuo script -->
     <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
 
     <!-- Il tuo script UNA sola volta -->
-    <script src="script.js?v=2"></script>
+    <script src="script.js"></script>
   </body>
 </html>
