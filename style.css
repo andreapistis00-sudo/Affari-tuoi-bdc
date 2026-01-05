@@ -1,618 +1,226 @@
-:root{
-  --bg: #070b16;
-  --panel: rgba(255,255,255,.06);
-  --text: #eaf0ff;
-  --muted: rgba(234,240,255,.75);
-  --border: rgba(255,255,255,.12);
-  --shadow: 0 22px 70px rgba(0,0,0,.55);
-  --radius: 18px;
+<!DOCTYPE html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>IL GIOCO DEI PACCHI</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
 
-  /* TV accents */
-  --gold: rgba(255, 208, 74, .95);
-  --goldSoft: rgba(255, 208, 74, .22);
-  --hot: rgba(255, 70, 130, .9);
-  --cyan: rgba(72, 214, 255, .85);
-}
+  <body class="tv at">
+    <div class="app">
+      <header class="topbar">
+        <div class="title">
+          <div class="titleRow">
+            <h1 id="gameTitle">IL GIOCO DEI PACCHI</h1>
+            <span class="liveBadge" aria-label="Live">LIVE</span>
+          </div>
+          <p id="subtitle">Scegli una località e prova a portarti a casa il premio migliore!</p>
+        </div>
 
-*{ box-sizing:border-box; }
-html,body{ height:100%; }
+        <div class="status">
+          <div class="chip chip-gold">
+            <span>Pacchi aperti</span>
+            <strong id="openedLabel">0</strong>
+          </div>
+          <div class="chip chip-blue">
+            <span>Il tuo pacco</span>
+            <strong id="myCaseLabel">—</strong>
+          </div>
+        </div>
+      </header>
 
-body{
-  margin:0;
-  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
-  background:
-    radial-gradient(1200px 600px at 25% -10%, rgba(124,92,255,.38), transparent 60%),
-    radial-gradient(900px 700px at 110% 20%, rgba(54,211,153,.22), transparent 55%),
-    radial-gradient(900px 520px at 40% 120%, rgba(255,208,74,.10), transparent 60%),
-    var(--bg);
-  color:var(--text);
-}
+      <main class="layout">
+        <section class="panel prizes">
+          <h2>Premi</h2>
+          <div class="prizeGrid" id="prizeGrid"></div>
+          <div class="legend">
+            <span class="dot dot-low"></span> basso
+            <span class="dot dot-mid"></span> medio
+            <span class="dot dot-high"></span> alto
+          </div>
+        </section>
 
-body.tv::before{
-  content:"";
-  position:fixed;
-  inset:0;
-  pointer-events:none;
-  background:
-    repeating-linear-gradient(
-      to bottom,
-      rgba(255,255,255,.03) 0px,
-      rgba(255,255,255,.03) 1px,
-      transparent 2px,
-      transparent 6px
-    );
-  opacity:.22;
-  mix-blend-mode: overlay;
-}
+        <section class="panel board">
+          <div class="boardHeader">
+            <h2>Località</h2>
+            <div class="hint hint-gold" id="hintText">Inserisci il PIN per iniziare.</div>
+          </div>
 
-.app{
-  width:100%;
-  max-width:1200px;
-  margin:0 auto;
-  padding:18px;
-}
+          <div class="caseGrid" id="caseGrid"></div>
 
-.topbar{
-  display:flex; gap:16px; align-items:flex-start; justify-content:space-between;
-  padding:16px;
-  background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
-  border:1px solid var(--border);
-  border-radius:var(--radius);
-  box-shadow:var(--shadow);
-  position:relative;
-  overflow:hidden;
-}
+          <div class="actions">
+            <button class="btn secondary" id="btnNew">Nuova partita</button>
+            <button class="btn secondary" id="btnSwap" disabled>Cambia pacco</button>
 
-.topbar::after{
-  content:"";
-  position:absolute;
-  inset:-2px;
-  pointer-events:none;
-  background:
-    radial-gradient(500px 120px at 10% 0%, rgba(255,208,74,.22), transparent 60%),
-    radial-gradient(420px 160px at 110% 20%, rgba(72,214,255,.18), transparent 60%);
-  opacity:.8;
-}
+            <!-- non usati (offerta obbligatoria via modal) -->
+            <button class="btn" id="btnOffer" disabled>Vedi Offerta</button>
+            <button class="btn danger" id="btnDeal" disabled>ACCETTA</button>
+            <button class="btn ghost" id="btnNoDeal" disabled>RIFIUTA</button>
+          </div>
+        </section>
 
-.title h1{
-  margin:0;
-  letter-spacing:.10em;
-  font-size:24px;
-  text-transform:uppercase;
-  text-shadow: 0 8px 22px rgba(0,0,0,.45);
-}
-.title p{ margin:6px 0 0; color:var(--muted); }
+        <section class="panel offer">
+          <h2>Offerta</h2>
 
-.status{ display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end; }
-.chip{
-  min-width:180px;
-  padding:10px 12px;
-  border:1px solid rgba(255,255,255,.14);
-  border-radius:999px;
-  background:
-    radial-gradient(200px 80px at 30% 0%, rgba(255,208,74,.14), transparent 60%),
-    rgba(0,0,0,.20);
-  display:flex; justify-content:space-between; align-items:center; gap:10px;
-  box-shadow: 0 10px 28px rgba(0,0,0,.30);
-}
-.chip span{ color:var(--muted); font-size:12px; }
-.chip strong{ font-size:14px; }
+          <div class="offerBox atOffer">
+            <div class="bankerRow">
+              <div class="bankerAvatar" aria-hidden="true">💼</div>
+              <div>
+                <div class="bankerName" id="bankerName">Il Banco</div>
+                <div class="bankerLine" id="bankerLine">Inserisci il PIN per giocare.</div>
+              </div>
+            </div>
 
-.layout{
-  margin-top:16px;
-  display:grid;
-  grid-template-columns: 1fr 1.6fr 1fr;
-  gap:16px;
-}
+            <div class="offerValue atValue">
+              <div class="label">Ultima offerta</div>
+              <div class="value" id="offerValue">—</div>
+            </div>
 
-.panel{
-  background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.04));
-  border:1px solid rgba(255,255,255,.14);
-  border-radius:var(--radius);
-  box-shadow:var(--shadow);
-  padding:14px;
-  position:relative;
-  overflow:hidden;
-}
+            <div class="offerMeta" id="offerMeta">
+              <div class="only">
+                <span>Pacchi rimasti</span><strong id="casesLeft">—</strong>
+              </div>
+            </div>
+          </div>
 
-.panel::before{
-  content:"";
-  position:absolute;
-  inset:-1px;
-  pointer-events:none;
-  background:
-    radial-gradient(420px 180px at 10% 0%, rgba(255,208,74,.10), transparent 60%),
-    radial-gradient(420px 180px at 110% 20%, rgba(72,214,255,.08), transparent 60%);
-  opacity:.85;
-}
+          <div class="result" id="resultBox" hidden>
+            <h3 id="resultTitle">Risultato</h3>
+            <p id="resultText"></p>
+          </div>
+        </section>
+      </main>
 
-.panel h2{ margin:0 0 10px; font-size:16px; letter-spacing:.06em; text-transform:uppercase; }
+      <footer class="footer">
+        <span id="footerText">Stile “Affari Tuoi” • PIN obbligatorio • Partita riprende dopo refresh</span>
+      </footer>
+    </div>
 
-.prizeGrid{
-  display:grid;
-  grid-template-columns: 1fr;
-  gap:8px;
-  max-height:520px;
-  overflow:auto;
-  padding-right:6px;
-}
-.prizeItem{
-  display:flex; justify-content:space-between; align-items:center;
-  padding:10px 10px;
-  border-radius:14px;
-  border:1px solid rgba(255,255,255,.14);
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.06), rgba(0,0,0,.15));
-}
-.prizeItem.out{
-  opacity:.45;
-  text-decoration:line-through;
-  filter:saturate(.6);
-}
-.tag{
-  font-size:11px;
-  padding:4px 9px;
-  border-radius:999px;
-  border:1px solid rgba(255,255,255,.16);
-  color:rgba(234,240,255,.85);
-  letter-spacing:.10em;
-}
-.tag.low{ border-color: rgba(54,211,153,.55); }
-.tag.mid{ border-color: rgba(251,191,36,.65); }
-.tag.high{ border-color: rgba(251,113,133,.65); }
+    <!-- MODAL: LOGIN PIN (obbligatorio) -->
+    <div class="modal atModal" id="pinModal" hidden>
+      <div class="modalCard atCard" role="dialog" aria-modal="true" aria-labelledby="pinTitle">
+        <div class="modalTop">
+          <div class="modalBadge atBadge" id="pinTitle">ACCESSO</div>
+          <!-- niente X: accesso obbligatorio -->
+          <div style="width:38px;height:38px;" aria-hidden="true"></div>
+        </div>
 
-.legend{
-  margin-top:10px;
-  color:var(--muted);
-  display:flex; gap:12px; align-items:center; flex-wrap:wrap;
-  font-size:12px;
-}
-.dot{ width:10px; height:10px; border-radius:50%; display:inline-block; margin-right:6px; }
-.dot-low{ background: rgba(54,211,153,.9); }
-.dot-mid{ background: rgba(251,191,36,.9); }
-.dot-high{ background: rgba(251,113,133,.9); }
+        <div class="modalBody">
+          <div class="atSpotlight" aria-hidden="true"></div>
+          <div class="modalIcon atIcon" aria-hidden="true">🔒</div>
+          <div class="modalPlace atTitle">INSERISCI IL PIN</div>
+          <div class="modalSub atSub">Per giocare è necessario l’accesso.</div>
 
-.boardHeader{
-  display:flex; align-items:center; justify-content:space-between; gap:10px;
-}
-.hint{
-  color:rgba(234,240,255,.86);
-  font-size:12px;
-  padding:8px 12px;
-  border-radius:999px;
-  border:1px solid rgba(255,208,74,.28);
-  background:
-    radial-gradient(240px 70px at 20% 0%, rgba(255,208,74,.16), transparent 60%),
-    rgba(0,0,0,.20);
-  box-shadow: 0 10px 28px rgba(0,0,0,.30);
-}
+          <div class="accessForm">
+            <input
+              id="pinInput"
+              class="accessInput atPin"
+              type="password"
+              inputmode="numeric"
+              autocomplete="one-time-code"
+              placeholder="PIN"
+              maxlength="8"
+            />
+            <button class="btn atPrimary" id="pinSubmit">ENTRA</button>
+          </div>
 
-.caseGrid{
-  margin-top:12px;
-  display:grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap:10px;
-}
+          <div class="accessError" id="pinError" hidden></div>
+        </div>
+      </div>
+    </div>
 
-.caseBtn{
-  position:relative;
-  border-radius:18px;
-  border:1px solid rgba(255,255,255,.16);
-  background:
-    radial-gradient(220px 90px at 30% 0%, rgba(255,208,74,.14), transparent 60%),
-    linear-gradient(180deg, rgba(255,255,255,.10), rgba(0,0,0,.20));
-  color:var(--text);
-  padding:14px 10px;
-  cursor:pointer;
-  transition: transform .12s ease, opacity .12s ease, box-shadow .12s ease;
-  min-height:78px;
-  box-shadow: 0 14px 34px rgba(0,0,0,.34);
-}
-.caseBtn:hover{ transform: translateY(-2px); box-shadow: 0 18px 48px rgba(0,0,0,.42); }
-.caseBtn .num{
-  font-weight:950;
-  font-size:12px;
-  line-height:1.15;
-  text-transform:uppercase;
-  letter-spacing:.06em;
-  text-shadow: 0 10px 22px rgba(0,0,0,.40);
-}
-.caseBtn .small{ display:block; color:rgba(234,240,255,.80); font-size:11px; margin-top:8px; letter-spacing:.10em; text-transform:uppercase; }
-.caseBtn.mine{
-  outline:2px solid rgba(255,208,74,.85);
-  box-shadow:
-    0 0 0 6px rgba(255,208,74,.14),
-    0 18px 48px rgba(0,0,0,.42);
-}
-.caseBtn.opened{ opacity:.38; cursor:not-allowed; transform:none; }
-.caseBtn.opened::after{
-  content:"APERTO";
-  position:absolute;
-  inset:auto 10px 10px 10px;
-  font-size:10px;
-  letter-spacing:.16em;
-  color:rgba(234,240,255,.70);
-}
+    <!-- MODAL: SCEGLI IL TUO PACCO (obbligatorio) -->
+    <div class="modal atModal" id="pickModal" hidden>
+      <div class="modalCard atCard" role="dialog" aria-modal="true" aria-labelledby="pickTitle">
+        <div class="modalTop">
+          <div class="modalBadge atBadge" id="pickTitle">SCEGLI IL TUO PACCO</div>
+          <button class="modalClose atClose" id="pickClose" aria-label="Chiudi">✕</button>
+        </div>
 
-.actions{ margin-top:12px; display:flex; gap:10px; flex-wrap:wrap; }
+        <div class="modalBody">
+          <div class="atSpotlight" aria-hidden="true"></div>
+          <div class="modalIcon atIcon" aria-hidden="true">📦</div>
+          <div class="modalPlace atTitle">SCEGLI LA TUA LOCALITÀ</div>
+          <div class="modalSub atSub">Clicca una località per iniziare.</div>
 
-.btn{
-  border:1px solid rgba(255,255,255,.16);
-  background: rgba(124,92,255,.35);
-  color:var(--text);
-  padding:10px 12px;
-  border-radius:14px;
-  cursor:pointer;
-  transition: transform .12s ease, opacity .12s ease, box-shadow .12s ease;
-  font-weight:900;
-  letter-spacing:.06em;
-  text-transform:uppercase;
-  box-shadow: 0 12px 34px rgba(0,0,0,.30);
-}
-.btn:hover{ transform: translateY(-1px); box-shadow: 0 16px 44px rgba(0,0,0,.38); }
-.btn:disabled{ opacity:.4; cursor:not-allowed; transform:none; box-shadow:none; }
-.btn.secondary{ background: rgba(255,255,255,.08); }
-.btn.danger{ background: rgba(251,113,133,.22); }
-.btn.ghost{ background: transparent; box-shadow:none; }
+          <div class="swapGrid" id="pickGrid"></div>
+        </div>
 
-.btn.tvPrimary{
-  background:
-    radial-gradient(240px 80px at 30% 0%, rgba(255,208,74,.34), transparent 60%),
-    rgba(255,208,74,.18);
-  border-color: rgba(255,208,74,.50);
-}
+        <div class="modalActions">
+          <button class="btn secondary" id="pickRandom">Scelta casuale</button>
+        </div>
+      </div>
+    </div>
 
-.offerBox{
-  border:1px solid rgba(255,255,255,.16);
-  border-radius:18px;
-  background:
-    radial-gradient(320px 120px at 20% 0%, rgba(72,214,255,.14), transparent 60%),
-    rgba(0,0,0,.20);
-  padding:12px;
-}
-.bankerRow{ display:flex; gap:10px; align-items:center; margin-bottom:10px; }
-.bankerAvatar{
-  width:44px; height:44px; border-radius:14px;
-  display:grid; place-items:center;
-  background:
-    radial-gradient(160px 60px at 30% 0%, rgba(255,208,74,.18), transparent 60%),
-    rgba(255,255,255,.08);
-  border:1px solid rgba(255,255,255,.16);
-  font-size:20px;
-}
-.bankerName{ font-weight:950; letter-spacing:.08em; text-transform:uppercase; }
-.bankerLine{ color:rgba(234,240,255,.82); font-size:12px; margin-top:2px; }
+    <!-- MODAL: PREMIO USCITO -->
+    <div class="modal atModal" id="revealModal" hidden>
+      <div class="modalCard atCard" role="dialog" aria-modal="true" aria-labelledby="revealTitle">
+        <div class="modalTop">
+          <div class="modalBadge atBadge" id="revealTitle">PREMIO USCITO</div>
+          <button class="modalClose atClose" id="revealClose" aria-label="Chiudi">✕</button>
+        </div>
 
-.offerValue{
-  margin-top:12px;
-  padding:12px;
-  border-radius:16px;
-  border:1px solid rgba(255,255,255,.16);
-  background:
-    radial-gradient(280px 80px at 20% 0%, rgba(255,208,74,.16), transparent 60%),
-    rgba(255,255,255,.05);
-}
-.offerValue .label{ color:rgba(234,240,255,.78); font-size:12px; letter-spacing:.10em; text-transform:uppercase; }
-.offerValue .value{
-  font-size:30px;
-  font-weight:950;
-  margin-top:6px;
-  text-shadow: 0 16px 34px rgba(0,0,0,.38);
-}
+        <div class="modalBody">
+          <div class="atSpotlight" aria-hidden="true"></div>
+          <div class="modalIcon atIcon" aria-hidden="true">🎁</div>
+          <div class="modalPlace atTitle" id="revealPlace">—</div>
+          <div class="modalPrize atPrize" id="revealPrize">—</div>
+          <div class="modalSub atSub" id="revealSub">Continua ad aprire le località.</div>
+        </div>
 
-.offerMeta{
-  margin-top:10px;
-  display:grid;
-  grid-template-columns: 1fr 1fr;
-  gap:10px;
-}
-.offerMeta div{
-  padding:10px;
-  border-radius:16px;
-  border:1px solid rgba(255,255,255,.16);
-  background: rgba(255,255,255,.04);
-  display:flex; justify-content:space-between; align-items:center;
-}
-.offerMeta span{ color:rgba(234,240,255,.78); font-size:12px; }
-.offerMeta .only{ grid-column: 1 / -1; }
+        <div class="modalActions">
+          <button class="btn atPrimary" id="revealOk">OK, continua</button>
+        </div>
+      </div>
+    </div>
 
-.result{
-  margin-top:12px;
-  padding:12px;
-  border-radius:18px;
-  border:1px solid rgba(54,211,153,.55);
-  background:
-    radial-gradient(280px 90px at 20% 0%, rgba(54,211,153,.20), transparent 60%),
-    rgba(54,211,153,.10);
-}
-.result p{ margin:0; color:rgba(234,240,255,.82); white-space:pre-line; }
+    <!-- MODAL: OFFERTA (obbligatorio) -->
+    <div class="modal atModal" id="offerModal" hidden>
+      <div class="modalCard atCard" role="dialog" aria-modal="true" aria-labelledby="offerTitle">
+        <div class="modalTop">
+          <div class="modalBadge atBadge" id="offerTitle">OFFERTA DEL BANCO</div>
+          <button class="modalClose atClose" id="offerClose" aria-label="Chiudi">✕</button>
+        </div>
 
-.footer{
-  margin-top:16px;
-  color:rgba(234,240,255,.70);
-  font-size:12px;
-  text-align:center;
-  display:flex;
-  gap:10px;
-  justify-content:center;
-  align-items:center;
-  flex-wrap:wrap;
-}
+        <div class="modalBody">
+          <div class="atSpotlight" aria-hidden="true"></div>
+          <div class="modalIcon atIcon" aria-hidden="true">💼</div>
+          <div class="modalPlace atTitle">IL BANCO TI OFFRE:</div>
+          <div class="modalPrize atOfferPrize" id="offerModalValue">—</div>
+          <div class="modalSub atSub" id="offerModalSub">Devi scegliere: accetta o rifiuta.</div>
+        </div>
 
-/* MODAL */
-.modal{
-  position:fixed;
-  inset:0;
-  display:grid;
-  place-items:center;
-  background:
-    radial-gradient(900px 520px at 50% -10%, rgba(255,208,74,.10), transparent 60%),
-    rgba(0,0,0,.60);
-  backdrop-filter: blur(7px);
-  z-index: 9999;
-  padding: calc(18px + env(safe-area-inset-top)) 18px calc(18px + env(safe-area-inset-bottom));
-}
-.modal[hidden]{ display:none !important; }
+        <div class="modalActions two">
+          <button class="btn atAccept" id="offerAccept">ACCETTA L'OFFERTA</button>
+          <button class="btn atReject" id="offerReject">RIFIUTA L'OFFERTA</button>
+        </div>
+      </div>
+    </div>
 
-.modalCard{
-  width:min(780px, 100%);
-  max-height: calc(100dvh - 36px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
-  border-radius: 22px;
-  border: 1px solid rgba(255,255,255,.16);
-  background: linear-gradient(180deg, rgba(255,255,255,.12), rgba(0,0,0,.34));
-  box-shadow: var(--shadow);
-  overflow: hidden;
+    <!-- MODAL: CAMBIO PACCO (obbligatorio) -->
+    <div class="modal atModal" id="swapModal" hidden>
+      <div class="modalCard atCard" role="dialog" aria-modal="true" aria-labelledby="swapTitle">
+        <div class="modalTop">
+          <div class="modalBadge atBadge" id="swapTitle">CAMBIO PACCO</div>
+          <button class="modalClose atClose" id="swapClose" aria-label="Chiudi">✕</button>
+        </div>
 
-  display:flex;
-  flex-direction: column;
-  position:relative;
-}
+        <div class="modalBody">
+          <div class="atSpotlight" aria-hidden="true"></div>
+          <div class="modalIcon atIcon" aria-hidden="true">🔁</div>
+          <div class="modalPlace atTitle" id="swapMyCase">Il tuo pacco: —</div>
+          <div class="modalSub atSub" id="swapSub">
+            Scegli un pacco con cui scambiare, oppure continua senza cambiare.
+          </div>
+          <div class="swapGrid" id="swapGrid"></div>
+        </div>
 
-.tvCard{
-  border-color: rgba(255,208,74,.22);
-  box-shadow:
-    0 26px 90px rgba(0,0,0,.62),
-    0 0 0 1px rgba(255,208,74,.10) inset;
-}
+        <div class="modalActions">
+          <button class="btn secondary" id="swapSkip">Continua senza cambiare</button>
+        </div>
+      </div>
+    </div>
 
-.modalTop{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding: 14px 14px 10px;
-}
-
-.modalBadge{
-  font-weight: 950;
-  letter-spacing:.16em;
-  font-size: 12px;
-  padding: 8px 10px;
-  border-radius: 999px;
-  border: 1px solid rgba(255,255,255,.16);
-  background: rgba(124,92,255,.22);
-  text-transform:uppercase;
-}
-.tvBadge{
-  background:
-    radial-gradient(200px 70px at 30% 0%, rgba(255,208,74,.25), transparent 60%),
-    rgba(255,208,74,.10);
-  border-color: rgba(255,208,74,.45);
-  color: rgba(255,240,205,.98);
-}
-
-.modalClose{
-  border:1px solid rgba(255,255,255,.16);
-  background: rgba(255,255,255,.06);
-  color: var(--text);
-  width: 38px;
-  height: 38px;
-  border-radius: 14px;
-  cursor:pointer;
-  font-size: 16px;
-  transition: transform .12s ease, box-shadow .12s ease;
-}
-.modalClose:hover{ transform: translateY(-1px); box-shadow: 0 14px 34px rgba(0,0,0,.35); }
-
-.modalBody{
-  padding: 6px 18px 16px;
-  text-align:center;
-
-  flex: 1 1 auto;
-  overflow-y:auto;
-  -webkit-overflow-scrolling: touch;
-  position:relative;
-}
-
-.tvSpotlight{
-  position:absolute;
-  inset:-20px -40px auto -40px;
-  height:160px;
-  pointer-events:none;
-  background:
-    radial-gradient(460px 160px at 50% 0%, rgba(255,208,74,.18), transparent 60%),
-    radial-gradient(420px 160px at 80% 30%, rgba(72,214,255,.10), transparent 65%);
-  opacity:.9;
-  filter: blur(1px);
-}
-
-.modalIcon{ font-size: 44px; margin-top: 6px; }
-.tvIcon{
-  filter: drop-shadow(0 16px 34px rgba(0,0,0,.45));
-}
-.modalPlace{ margin-top: 10px; font-size: 19px; font-weight: 950; letter-spacing:.04em; }
-.modalPrize{ margin-top: 8px; font-size: 28px; font-weight: 950; }
-.modalSub{ margin-top: 10px; color: rgba(234,240,255,.82); font-size: 12px; letter-spacing:.06em; }
-
-.modalActions{
-  padding: 14px 18px 18px;
-  display:flex;
-  justify-content:center;
-  gap:10px;
-  flex-wrap:wrap;
-}
-.modalActions.two{ justify-content:space-between; }
-
-body.modal-open{ overflow: hidden; }
-
-/* swap grid (usata sia in pick che in swap) */
-.swapGrid{
-  margin-top: 14px;
-  display:grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  text-align:left;
-}
-.swapBtn{
-  border:1px solid rgba(255,255,255,.16);
-  background:
-    radial-gradient(220px 70px at 20% 0%, rgba(255,208,74,.10), transparent 60%),
-    rgba(255,255,255,.06);
-  color: var(--text);
-  border-radius: 16px;
-  padding: 12px 10px;
-  cursor:pointer;
-  transition: transform .12s ease, opacity .12s ease, box-shadow .12s ease;
-  box-shadow: 0 12px 32px rgba(0,0,0,.28);
-}
-.swapBtn:hover{ transform: translateY(-1px); box-shadow: 0 16px 44px rgba(0,0,0,.36); }
-.swapBtn strong{ display:block; font-size:12px; letter-spacing:.08em; text-transform:uppercase; }
-.swapBtn span{ display:block; margin-top:6px; color:rgba(234,240,255,.78); font-size:11px; letter-spacing:.10em; text-transform:uppercase; }
-
-/* PIN */
-.accessForm{
-  margin-top: 16px;
-  display:flex;
-  gap:10px;
-  align-items:center;
-  justify-content:center;
-  flex-wrap:wrap;
-}
-.accessInput{
-  width: min(340px, 100%);
-  border: 1px solid rgba(255,208,74,.28);
-  background:
-    radial-gradient(260px 90px at 30% 0%, rgba(255,208,74,.14), transparent 60%),
-    rgba(0,0,0,.22);
-  color: var(--text);
-  border-radius: 16px;
-  padding: 14px 14px;
-  font-weight: 950;
-  letter-spacing: .30em;
-  outline: none;
-  box-shadow: 0 18px 48px rgba(0,0,0,.38);
-
-  /* ✅ maschera caratteri (iOS/Safari) */
-  -webkit-text-security: disc;
-  caret-color: var(--text);
-}
-.accessInput::placeholder{
-  color: rgba(234,240,255,.45);
-  letter-spacing: 0;
-  font-weight: 700;
-}
-.tvPin{
-  font-size: 18px;
-  text-align: center;
-}
-.accessError{
-  margin-top: 12px;
-  padding: 10px 12px;
-  border-radius: 14px;
-  border: 1px solid rgba(251,113,133,.55);
-  background: rgba(251,113,133,.12);
-  color: rgba(234,240,255,.95);
-  font-size: 12px;
-  letter-spacing:.04em;
-}
-
-/* Offer modal big number (TV) */
-.tvOfferPrize{
-  letter-spacing:.06em;
-  text-shadow:
-    0 18px 40px rgba(0,0,0,.55),
-    0 0 22px rgba(255,208,74,.18);
-}
-
-/* Offer buttons */
-.btn.tvAccept{
-  background: rgba(54,211,153,.22);
-  border-color: rgba(54,211,153,.60);
-}
-.btn.tvReject{
-  background: rgba(251,113,133,.18);
-  border-color: rgba(251,113,133,.62);
-}
-
-/* Animations */
-@keyframes tvPop{
-  0%{ transform: translateY(6px) scale(.98); opacity:.0; }
-  100%{ transform: translateY(0) scale(1); opacity:1; }
-}
-@keyframes tvPulse{
-  0%,100%{ transform: scale(1); }
-  50%{ transform: scale(1.04); }
-}
-@keyframes tvShake{
-  0%{ transform: translateX(0); }
-  20%{ transform: translateX(-8px); }
-  40%{ transform: translateX(8px); }
-  60%{ transform: translateX(-6px); }
-  80%{ transform: translateX(6px); }
-  100%{ transform: translateX(0); }
-}
-
-.modalCard.tvEnter{
-  animation: tvPop .18s ease-out both;
-}
-.modalCard.shake{
-  animation: tvShake .28s ease-in-out;
-}
-.tvPulse{
-  animation: tvPulse .36s ease-in-out;
-}
-
-/* MOBILE */
-@media (max-width: 980px){
-  .layout{ grid-template-columns: 1fr; }
-
-  .topbar{
-    flex-direction: column;
-    align-items: stretch;
-    gap: 12px;
-  }
-  .status{ justify-content:flex-start; }
-  .chip{
-    min-width: 0;
-    flex: 1 1 auto;
-  }
-
-  .board{ order: 1; }
-  .offer{ order: 2; }
-  .prizes{ order: 3; }
-
-  .caseGrid{
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-  }
-  .caseBtn{
-    min-height: 92px;
-    padding: 16px 10px;
-  }
-  .caseBtn .num{ font-size: 13px; }
-  .caseBtn .small{ font-size: 11px; }
-
-  .actions{
-    flex-direction: column;
-    gap: 10px;
-  }
-  .actions .btn{ width: 100%; }
-
-  .prizeGrid{ max-height: 260px; }
-
-  .modalCard{ width: min(560px, 100%); }
-  .swapGrid{ grid-template-columns: repeat(2, 1fr); }
-}
-
-@media (max-width: 420px){
-  .caseGrid{ grid-template-columns: repeat(2, 1fr); }
-}
+    <script src="script.js" type="module"></script>
+  </body>
+</html>
