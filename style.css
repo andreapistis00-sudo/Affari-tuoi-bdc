@@ -20,6 +20,9 @@ body{
               radial-gradient(900px 700px at 110% 20%, rgba(54,211,153,.22), transparent 55%),
               var(--bg);
   color:var(--text);
+
+  /* ✅ evita overflow orizzontale dovuto a transform su .app */
+  overflow-x: hidden;
 }
 
 /* ✅ Desktop base fisso 1200px + scala automatica */
@@ -331,6 +334,48 @@ body.modal-open{ overflow:hidden; }
 #offerReject{
   background: rgba(251,113,133,.22);
   border-color: rgba(251,113,133,.55);
+}
+
+/* Zoom controls */
+.zoomControls{
+  position: fixed;
+  right: 12px;
+  bottom: 12px;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 10px;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: rgba(0,0,0,.35);
+  backdrop-filter: blur(6px);
+}
+
+.zoomBtn{
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,.08);
+  color: var(--text);
+  font-weight: 900;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.zoomBtn.reset{
+  font-size: 16px;
+}
+
+.zoomPct{
+  min-width: 54px;
+  text-align: center;
+  font-weight: 800;
+  color: var(--text);
+  opacity: .9;
+  font-size: 12px;
 }
 
 /* Manteniamo le regole già presenti (non collassiamo in 1 colonna) */
