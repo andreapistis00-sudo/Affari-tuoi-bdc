@@ -18,10 +18,10 @@ document.addEventListener("DOMContentLoaded", () => {
     ],
 
     prizeLabels: [
-      "Premio 1","Premio 2","Premio 3","Premio 4","Premio 5",
-      "Premio 6","Premio 7","Premio 8","Premio 9","Premio 10",
-      "Premio 11","Premio 12","Premio 13","Premio 14","Premio 15",
-      "Premio 16","Premio 17","Premio 18","Premio 19","Premio 20"
+      "Giro d'acqua - €00,00"," 1 Gusto gelato - €1,00","1 caffè - €5,00","1 Bibita - €10,00","1 Amaro - €20,00",
+      "1 Birra - €50,00","1 Calice di vino - €75,00","1 Coktail - €100,00","Colazione singola - €200,00","1 Kg di gelato - €500,00",
+      "Sconto 15% bdc - €5.000","Colazione 2x1 - €10.000","Sconto 30% bdc - €15.000","Colazione x2 - €20.000","Aperitivo 2x4 - €30.000",
+      "Aperitivo x2 - €50.000","Sconto 50% Bdc - €75.000 ","1 Bottiglia di vino - €100.000","Giro Precedente gratis - €200.000","Giro preced. + Bottiglia - €300.000"
     ],
 
     // valori interni per offerta (non mostrati)
