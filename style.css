@@ -377,4 +377,26 @@ body.modal-open{ overflow:hidden; }
 @media (max-width: 420px){
   .caseGrid{ grid-template-columns: repeat(2, 1fr); }
 }
+/* ✅ Mobile: modali sempre visibili (card max-height + body scroll) */
+@media (max-width: 980px){
+  .modal{
+    padding-top: calc(12px + env(safe-area-inset-top));
+    padding-bottom: calc(12px + env(safe-area-inset-bottom));
+  }
+
+  .modalCard{
+    max-height: calc(100dvh - 24px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    display: flex;
+    flex-direction: column;
+  }
+
+  .modalBody{
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .modalActions{
+    flex: 0 0 auto;
+  }
+}
 
