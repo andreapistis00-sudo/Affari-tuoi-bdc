@@ -7,20 +7,23 @@
     <link rel="stylesheet" href="style.css" />
   </head>
 
-  <body class="tv">
+  <body class="tv at">
     <div class="app">
       <header class="topbar">
         <div class="title">
-          <h1 id="gameTitle">IL GIOCO DEI PACCHI</h1>
+          <div class="titleRow">
+            <h1 id="gameTitle">IL GIOCO DEI PACCHI</h1>
+            <span class="liveBadge" aria-label="Live">LIVE</span>
+          </div>
           <p id="subtitle">Scegli una località e prova a portarti a casa il premio migliore!</p>
         </div>
 
         <div class="status">
-          <div class="chip">
+          <div class="chip chip-gold">
             <span>Pacchi aperti</span>
             <strong id="openedLabel">0</strong>
           </div>
-          <div class="chip">
+          <div class="chip chip-blue">
             <span>Il tuo pacco</span>
             <strong id="myCaseLabel">—</strong>
           </div>
@@ -41,7 +44,7 @@
         <section class="panel board">
           <div class="boardHeader">
             <h2>Località</h2>
-            <div class="hint" id="hintText">Inserisci il PIN per iniziare.</div>
+            <div class="hint hint-gold" id="hintText">Inserisci il PIN per iniziare.</div>
           </div>
 
           <div class="caseGrid" id="caseGrid"></div>
@@ -60,7 +63,7 @@
         <section class="panel offer">
           <h2>Offerta</h2>
 
-          <div class="offerBox">
+          <div class="offerBox atOffer">
             <div class="bankerRow">
               <div class="bankerAvatar" aria-hidden="true">💼</div>
               <div>
@@ -69,7 +72,7 @@
               </div>
             </div>
 
-            <div class="offerValue">
+            <div class="offerValue atValue">
               <div class="label">Ultima offerta</div>
               <div class="value" id="offerValue">—</div>
             </div>
@@ -89,36 +92,36 @@
       </main>
 
       <footer class="footer">
-        <span id="footerText">Grafica “TV show” • Accesso con PIN obbligatorio</span>
+        <span id="footerText">Stile “Affari Tuoi” • PIN obbligatorio • Partita riprende dopo refresh</span>
       </footer>
     </div>
 
     <!-- MODAL: LOGIN PIN (obbligatorio) -->
-    <div class="modal" id="pinModal" hidden>
-      <div class="modalCard tvCard" role="dialog" aria-modal="true" aria-labelledby="pinTitle">
+    <div class="modal atModal" id="pinModal" hidden>
+      <div class="modalCard atCard" role="dialog" aria-modal="true" aria-labelledby="pinTitle">
         <div class="modalTop">
-          <div class="modalBadge tvBadge" id="pinTitle">ACCESSO</div>
+          <div class="modalBadge atBadge" id="pinTitle">ACCESSO</div>
           <!-- niente X: accesso obbligatorio -->
           <div style="width:38px;height:38px;" aria-hidden="true"></div>
         </div>
 
         <div class="modalBody">
-          <div class="tvSpotlight" aria-hidden="true"></div>
-          <div class="modalIcon tvIcon" aria-hidden="true">🔒</div>
-          <div class="modalPlace">Inserisci il PIN per giocare</div>
-          <div class="modalSub">Il gioco si avvia solo dopo l’accesso.</div>
+          <div class="atSpotlight" aria-hidden="true"></div>
+          <div class="modalIcon atIcon" aria-hidden="true">🔒</div>
+          <div class="modalPlace atTitle">INSERISCI IL PIN</div>
+          <div class="modalSub atSub">Per giocare è necessario l’accesso.</div>
 
           <div class="accessForm">
             <input
               id="pinInput"
-              class="accessInput tvPin"
+              class="accessInput atPin"
               type="password"
               inputmode="numeric"
               autocomplete="one-time-code"
               placeholder="PIN"
               maxlength="8"
             />
-            <button class="btn tvPrimary" id="pinSubmit">ENTRA</button>
+            <button class="btn atPrimary" id="pinSubmit">ENTRA</button>
           </div>
 
           <div class="accessError" id="pinError" hidden></div>
@@ -127,18 +130,18 @@
     </div>
 
     <!-- MODAL: SCEGLI IL TUO PACCO (obbligatorio) -->
-    <div class="modal" id="pickModal" hidden>
-      <div class="modalCard tvCard" role="dialog" aria-modal="true" aria-labelledby="pickTitle">
+    <div class="modal atModal" id="pickModal" hidden>
+      <div class="modalCard atCard" role="dialog" aria-modal="true" aria-labelledby="pickTitle">
         <div class="modalTop">
-          <div class="modalBadge tvBadge" id="pickTitle">SCEGLI IL TUO PACCO</div>
-          <button class="modalClose" id="pickClose" aria-label="Chiudi">✕</button>
+          <div class="modalBadge atBadge" id="pickTitle">SCEGLI IL TUO PACCO</div>
+          <button class="modalClose atClose" id="pickClose" aria-label="Chiudi">✕</button>
         </div>
 
         <div class="modalBody">
-          <div class="tvSpotlight" aria-hidden="true"></div>
-          <div class="modalIcon tvIcon" aria-hidden="true">📦</div>
-          <div class="modalPlace">Scegli una località come tuo pacco personale.</div>
-          <div class="modalSub">Clicca una località per iniziare.</div>
+          <div class="atSpotlight" aria-hidden="true"></div>
+          <div class="modalIcon atIcon" aria-hidden="true">📦</div>
+          <div class="modalPlace atTitle">SCEGLI LA TUA LOCALITÀ</div>
+          <div class="modalSub atSub">Clicca una località per iniziare.</div>
 
           <div class="swapGrid" id="pickGrid"></div>
         </div>
@@ -150,63 +153,63 @@
     </div>
 
     <!-- MODAL: PREMIO USCITO -->
-    <div class="modal" id="revealModal" hidden>
-      <div class="modalCard tvCard" role="dialog" aria-modal="true" aria-labelledby="revealTitle">
+    <div class="modal atModal" id="revealModal" hidden>
+      <div class="modalCard atCard" role="dialog" aria-modal="true" aria-labelledby="revealTitle">
         <div class="modalTop">
-          <div class="modalBadge tvBadge" id="revealTitle">PREMIO USCITO</div>
-          <button class="modalClose" id="revealClose" aria-label="Chiudi">✕</button>
+          <div class="modalBadge atBadge" id="revealTitle">PREMIO USCITO</div>
+          <button class="modalClose atClose" id="revealClose" aria-label="Chiudi">✕</button>
         </div>
 
         <div class="modalBody">
-          <div class="tvSpotlight" aria-hidden="true"></div>
-          <div class="modalIcon tvIcon" aria-hidden="true">🎁</div>
-          <div class="modalPlace" id="revealPlace">—</div>
-          <div class="modalPrize" id="revealPrize">—</div>
-          <div class="modalSub" id="revealSub">Continua ad aprire le località.</div>
+          <div class="atSpotlight" aria-hidden="true"></div>
+          <div class="modalIcon atIcon" aria-hidden="true">🎁</div>
+          <div class="modalPlace atTitle" id="revealPlace">—</div>
+          <div class="modalPrize atPrize" id="revealPrize">—</div>
+          <div class="modalSub atSub" id="revealSub">Continua ad aprire le località.</div>
         </div>
 
         <div class="modalActions">
-          <button class="btn tvPrimary" id="revealOk">OK, continua</button>
+          <button class="btn atPrimary" id="revealOk">OK, continua</button>
         </div>
       </div>
     </div>
 
     <!-- MODAL: OFFERTA (obbligatorio) -->
-    <div class="modal" id="offerModal" hidden>
-      <div class="modalCard tvCard" role="dialog" aria-modal="true" aria-labelledby="offerTitle">
+    <div class="modal atModal" id="offerModal" hidden>
+      <div class="modalCard atCard" role="dialog" aria-modal="true" aria-labelledby="offerTitle">
         <div class="modalTop">
-          <div class="modalBadge tvBadge" id="offerTitle">OFFERTA DEL BANCO</div>
-          <button class="modalClose" id="offerClose" aria-label="Chiudi">✕</button>
+          <div class="modalBadge atBadge" id="offerTitle">OFFERTA DEL BANCO</div>
+          <button class="modalClose atClose" id="offerClose" aria-label="Chiudi">✕</button>
         </div>
 
         <div class="modalBody">
-          <div class="tvSpotlight" aria-hidden="true"></div>
-          <div class="modalIcon tvIcon" aria-hidden="true">💼</div>
-          <div class="modalPlace">Il Banco ti offre:</div>
-          <div class="modalPrize tvOfferPrize" id="offerModalValue">—</div>
-          <div class="modalSub" id="offerModalSub">Devi scegliere: accetta o rifiuta.</div>
+          <div class="atSpotlight" aria-hidden="true"></div>
+          <div class="modalIcon atIcon" aria-hidden="true">💼</div>
+          <div class="modalPlace atTitle">IL BANCO TI OFFRE:</div>
+          <div class="modalPrize atOfferPrize" id="offerModalValue">—</div>
+          <div class="modalSub atSub" id="offerModalSub">Devi scegliere: accetta o rifiuta.</div>
         </div>
 
         <div class="modalActions two">
-          <button class="btn tvAccept" id="offerAccept">ACCETTA L'OFFERTA</button>
-          <button class="btn tvReject" id="offerReject">RIFIUTA L'OFFERTA</button>
+          <button class="btn atAccept" id="offerAccept">ACCETTA L'OFFERTA</button>
+          <button class="btn atReject" id="offerReject">RIFIUTA L'OFFERTA</button>
         </div>
       </div>
     </div>
 
     <!-- MODAL: CAMBIO PACCO (obbligatorio) -->
-    <div class="modal" id="swapModal" hidden>
-      <div class="modalCard tvCard" role="dialog" aria-modal="true" aria-labelledby="swapTitle">
+    <div class="modal atModal" id="swapModal" hidden>
+      <div class="modalCard atCard" role="dialog" aria-modal="true" aria-labelledby="swapTitle">
         <div class="modalTop">
-          <div class="modalBadge tvBadge" id="swapTitle">CAMBIO PACCO</div>
-          <button class="modalClose" id="swapClose" aria-label="Chiudi">✕</button>
+          <div class="modalBadge atBadge" id="swapTitle">CAMBIO PACCO</div>
+          <button class="modalClose atClose" id="swapClose" aria-label="Chiudi">✕</button>
         </div>
 
         <div class="modalBody">
-          <div class="tvSpotlight" aria-hidden="true"></div>
-          <div class="modalIcon tvIcon" aria-hidden="true">🔁</div>
-          <div class="modalPlace" id="swapMyCase">Il tuo pacco: —</div>
-          <div class="modalSub" id="swapSub">
+          <div class="atSpotlight" aria-hidden="true"></div>
+          <div class="modalIcon atIcon" aria-hidden="true">🔁</div>
+          <div class="modalPlace atTitle" id="swapMyCase">Il tuo pacco: —</div>
+          <div class="modalSub atSub" id="swapSub">
             Scegli un pacco con cui scambiare, oppure continua senza cambiare.
           </div>
           <div class="swapGrid" id="swapGrid"></div>
