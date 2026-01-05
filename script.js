@@ -189,7 +189,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     setBankerLine("Inserisci il PIN per giocare.");
     setHint("Inserisci il PIN per iniziare.");
-    // focus leggero
     setTimeout(()=>ui.pinInput && ui.pinInput.focus(), 50);
   }
 
@@ -230,7 +229,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if(e.key === "Enter") handlePinSubmit();
   });
 
-  // Blocca click su overlay per bypass
   ui.pinModal.addEventListener("click", (e)=>{
     if(e.target === ui.pinModal) showPinError("Accesso obbligatorio: inserisci il PIN.");
   });
@@ -496,7 +494,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if(state.phase === "ended") return;
     if(isAnyModalOpen()) return;
 
-    // ✅ blocco totale finché non sbloccato
     if(!state.access.unlocked){
       openPinGate();
       return;
@@ -521,7 +518,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const remaining = remainingCaseIds().length;
 
-    // fine naturale quando resta solo il tuo pacco
     if(remaining === 1){
       const my = state.cases.find(x=>x.id===state.myCaseId);
 
