@@ -318,7 +318,30 @@ body.modal-open{ overflow:hidden; }
 }
 
 @media (max-width: 980px){
-  .layout{ grid-template-columns: 1fr; }
-  .caseGrid{ grid-template-columns: repeat(4, 1fr); }
-  .swapGrid{ grid-template-columns: repeat(2, 1fr); }
+  /* Mantieni la struttura “desktop” anche su mobile */
+  .layout{
+    grid-template-columns: 1fr 1.6fr 1fr;
+  }
+
+  /* Griglie come desktop */
+  .caseGrid{ grid-template-columns: repeat(5, 1fr); }
+  .swapGrid{ grid-template-columns: repeat(3, 1fr); }
+}
+/* Mobile: mantieni layout desktop e scala l'intera app */
+@media (max-width: 520px){
+  .app{
+    transform: scale(.85);
+    transform-origin: top center;
+    width: calc(100% / .85);
+  }
+}
+/* Mobile: mantieni layout desktop e scala l'intera app */
+@media (max-width: 520px){
+  .app{
+    transform: scale(.85);
+    transform-origin: top center;
+    width: calc(100% / .85);
+  }
+}
+
 }
