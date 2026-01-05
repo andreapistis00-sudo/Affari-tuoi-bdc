@@ -21,15 +21,36 @@ document.addEventListener("DOMContentLoaded", () => {
       "Premio 16","Premio 17","Premio 18","Premio 19","Premio 20"
     ],
 
+    // valori interni per offerta (non mostrati)
     prizeValues: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20],
 
     offerMoments: [5, 15],
     swapMoments: [10],
     finalSwapAtTwoLeft: true,
-
     offerMultipliers: [0.62, 0.82],
     maxSwaps: 2
   };
+
+  /* ===== Firebase init (obbligatorio: incolla la tua config reale) ===== */
+  const firebaseConfig = {
+    // INCOLLA QUI (Firebase Console -> Project settings -> Your apps -> Web app)
+    // apiKey: "...",
+    // authDomain: "...",
+    // projectId: "...",
+    // storageBucket: "...",
+    // messagingSenderId: "...",
+    // appId: "..."
+  };
+
+  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+
+  /* ===== Cloud Functions URL (OBBLIGATORIO) ===== */
+  const PROJECT_ID = "IL_TUO_PROJECT_ID";
+  const REGION = "us-central1";
+  const FUNCTIONS_BASE = `https://${REGION}-${PROJECT_ID}.cloudfunctions.net`;
+  const URL_CREATE = `${FUNCTIONS_BASE}/createCode`;
+  const URL_REDEEM = `${FUNCTIONS_BASE}/redeemCode`;
+  const URL_FINISH = `${FUNCTIONS_BASE}/finishGame`;
 
   let state = null;
   let scrollY = 0;
@@ -62,6 +83,24 @@ document.addEventListener("DOMContentLoaded", () => {
     resultTitle: $("resultTitle"),
     resultText: $("resultText"),
 
+    // access
+    accessModal: $("accessModal"),
+    accessClose: $("accessClose"),
+    accessCodeInput: $("accessCodeInput"),
+    accessSubmit: $("accessSubmit"),
+    accessError: $("accessError"),
+
+    // staff
+    btnStaff: $("btnStaff"),
+    staffModal: $("staffModal"),
+    staffClose: $("staffClose"),
+    staffPin: $("staffPin"),
+    staffGenerate: $("staffGenerate"),
+    staffError: $("staffError"),
+    staffCodeBox: $("staffCodeBox"),
+    staffCode: $("staffCode"),
+    staffCopy: $("staffCopy"),
+
     // pick
     pickModal: $("pickModal"),
     pickGrid: $("pickGrid"),
@@ -90,14 +129,7 @@ document.addEventListener("DOMContentLoaded", () => {
     swapMyCase: $("swapMyCase"),
     swapSub: $("swapSub"),
     swapSkip: $("swapSkip"),
-    swapClose: $("swapClose"),
-
-    // access
-    accessModal: $("accessModal"),
-    accessClose: $("accessClose"),
-    accessCodeInput: $("accessCodeInput"),
-    accessSubmit: $("accessSubmit"),
-    accessError: $("accessError")
+    swapClose: $("swapClose")
   };
 
   /* ===== UTIL ===== */
@@ -130,7 +162,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function setBankerLine(t){ ui.bankerLine.textContent=t; }
   function renderOffer(v){ ui.offerValue.textContent=formatPoints(v); }
 
-  /* ===== MODAL BASE (iOS-safe body lock) ===== */
+  /* ===== MODAL BASE (lock scroll) ===== */
   function openModal(modalEl){
     scrollY = window.scrollY;
 
@@ -146,11 +178,12 @@ document.addEventListener("DOMContentLoaded", () => {
     modalEl.hidden = true;
 
     const anyOpen =
+      !ui.accessModal.hidden ||
+      !ui.staffModal.hidden ||
       !ui.pickModal.hidden ||
       !ui.revealModal.hidden ||
       !ui.offerModal.hidden ||
-      !ui.swapModal.hidden ||
-      !ui.accessModal.hidden;
+      !ui.swapModal.hidden;
 
     if(!anyOpen){
       document.body.classList.remove("modal-open");
@@ -165,15 +198,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function isAnyModalOpen(){
     return (
+      !ui.accessModal.hidden ||
+      !ui.staffModal.hidden ||
       !ui.pickModal.hidden ||
       !ui.revealModal.hidden ||
       !ui.offerModal.hidden ||
-      !ui.swapModal.hidden ||
-      !ui.accessModal.hidden
+      !ui.swapModal.hidden
     );
   }
 
-  /* ===== ACCESS GATE (STEP 1: UI + blocco) ===== */
+  /* ===== ACCESS GATE ===== */
   function showAccessError(msg){
     ui.accessError.hidden = !msg;
     ui.accessError.textContent = msg || "";
@@ -186,15 +220,57 @@ document.addEventListener("DOMContentLoaded", () => {
     setHint("Inserisci un codice per giocare.");
   }
 
-  function handleAccessSubmit(){
+  async function handleAccessSubmit(){
     const code = (ui.accessCodeInput.value || "").trim().toUpperCase();
+
     if(!code){
       showAccessError("Inserisci un codice.");
       return;
     }
+    if(!/^[A-Z0-9]{5}$/.test(code)){
+      showAccessError("Il codice deve essere di 5 caratteri (A-Z, 0-9).");
+      return;
+    }
 
-    // Step 2: qui faremo la verifica su Firestore e lo "consumo" del codice.
-    showAccessError("Codice inserito. (Step 2: verifica con staff/Firestore)");
+    showAccessError("");
+    ui.accessSubmit.disabled = true;
+
+    try{
+      const r = await fetch(URL_REDEEM, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code })
+      });
+
+      const data = await r.json().catch(()=>null);
+
+      if(!data || !data.ok){
+        const err = data && data.error ? data.error : "SERVER_ERROR";
+        const msg =
+          err === "NOT_FOUND" ? "Codice non trovato." :
+          err === "ALREADY_USED" ? "Codice già usato." :
+          err === "IN_GAME" ? "Questo codice è già in uso." :
+          err === "INVALID_CODE" ? "Codice non valido." :
+          "Errore. Riprova o chiama lo staff.";
+        showAccessError(msg);
+        return;
+      }
+
+      // OK: sbloccato dal server
+      state.access.code = code;
+      state.access.sessionId = data.sessionId;
+
+      closeModal(ui.accessModal);
+      setBankerLine("Accesso OK. Scegli il tuo pacco.");
+      setHint("Scegli la tua località (il tuo pacco).");
+
+      renderAll();
+      showPickModal();
+    }catch(e){
+      showAccessError("Connessione non disponibile. Riprova.");
+    }finally{
+      ui.accessSubmit.disabled = false;
+    }
   }
 
   ui.accessSubmit.addEventListener("click", handleAccessSubmit);
@@ -208,6 +284,78 @@ document.addEventListener("DOMContentLoaded", () => {
   ui.accessModal.addEventListener("click", (e)=>{
     if(e.target === ui.accessModal) showAccessError("Devi inserire un codice valido per giocare.");
   });
+
+  /* ===== STAFF PANEL ===== */
+  function showStaffError(msg){
+    ui.staffError.hidden = !msg;
+    ui.staffError.textContent = msg || "";
+  }
+
+  function openStaff(){
+    showStaffError("");
+    ui.staffPin.value = "";
+    ui.staffCodeBox.hidden = true;
+    ui.staffCode.textContent = "—";
+    openModal(ui.staffModal);
+  }
+
+  async function handleGenerateCode(){
+    const pin = String(ui.staffPin.value || "").trim();
+    if(!pin){
+      showStaffError("Inserisci il PIN staff.");
+      return;
+    }
+
+    showStaffError("");
+    ui.staffGenerate.disabled = true;
+
+    try{
+      const r = await fetch(URL_CREATE, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pin })
+      });
+
+      const data = await r.json().catch(()=>null);
+
+      if(!data || !data.ok){
+        const err = data && data.error ? data.error : "SERVER_ERROR";
+        const msg =
+          err === "WRONG_PIN" ? "PIN errato." :
+          err === "STAFF_PIN_NOT_CONFIGURED" ? "PIN non configurato nelle Functions." :
+          "Errore. Riprova.";
+        showStaffError(msg);
+        return;
+      }
+
+      ui.staffCode.textContent = data.code;
+      ui.staffCodeBox.hidden = false;
+      showStaffError("");
+    }catch(e){
+      showStaffError("Connessione non disponibile. Riprova.");
+    }finally{
+      ui.staffGenerate.disabled = false;
+    }
+  }
+
+  ui.btnStaff.addEventListener("click", openStaff);
+  ui.staffGenerate.addEventListener("click", handleGenerateCode);
+  ui.staffPin.addEventListener("keydown", (e)=>{ if(e.key === "Enter") handleGenerateCode(); });
+
+  ui.staffCopy.addEventListener("click", async ()=>{
+    const code = String(ui.staffCode.textContent || "").trim();
+    if(!code || code === "—") return;
+    try{
+      await navigator.clipboard.writeText(code);
+      showStaffError("Copiato negli appunti ✅");
+      setTimeout(()=>showStaffError(""), 1200);
+    }catch(e){
+      showStaffError("Non riesco a copiare: seleziona e copia manualmente.");
+    }
+  });
+
+  ui.staffClose.addEventListener("click", () => closeModal(ui.staffModal));
+  ui.staffModal.addEventListener("click", (e)=>{ if(e.target === ui.staffModal) closeModal(ui.staffModal); });
 
   /* ===== RENDER ===== */
   function prizeTierByValue(v){
@@ -280,7 +428,7 @@ document.addEventListener("DOMContentLoaded", () => {
     renderCases();
   }
 
-  /* ===== MODAL: PICK (obbligatorio) ===== */
+  /* ===== MODAL: PICK ===== */
   function showPickModal(){
     ui.pickGrid.innerHTML = "";
     state.cases.slice().sort((a,b)=>a.id-b.id).forEach(c=>{
@@ -334,7 +482,7 @@ document.addEventListener("DOMContentLoaded", () => {
   ui.revealClose.addEventListener("click", hideRevealModal);
   ui.revealModal.addEventListener("click", (e)=>{ if(e.target===ui.revealModal) hideRevealModal(); });
 
-  /* ===== MODAL: SWAP (obbligatorio) ===== */
+  /* ===== MODAL: SWAP ===== */
   function showSwapModalMandatory(){
     if(state.swapsLeft <= 0) return;
 
@@ -382,11 +530,25 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  /* ===== MODAL: OFFERTA (obbligatorio) ===== */
+  /* ===== MODAL: OFFERTA ===== */
   function showOfferModalMandatory(offer){
     ui.offerModalValue.textContent = formatPoints(offer);
     ui.offerModalSub.textContent = "Devi scegliere: accetta o rifiuta.";
     openModal(ui.offerModal);
+  }
+
+  function finishServer(outcome){
+    if(state.access && state.access.code && state.access.sessionId){
+      fetch(URL_FINISH, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          code: state.access.code,
+          sessionId: state.access.sessionId,
+          outcome: outcome || "ended"
+        })
+      }).catch(()=>{});
+    }
   }
 
   function acceptOffer(){
@@ -404,6 +566,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     state.phase = "ended";
     renderAll();
+
+    finishServer("offer_accepted");
   }
 
   function rejectOffer(){
@@ -489,6 +653,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const remaining = remainingCaseIds().length;
 
+    // fine naturale quando resta solo il tuo pacco
+    if(remaining === 1){
+      const my = state.cases.find(x=>x.id===state.myCaseId);
+
+      setBankerLine("Partita finita!");
+      setHint("Fine partita.");
+
+      ui.resultBox.hidden = false;
+      ui.resultTitle.textContent = "PARTITA FINITA!";
+      ui.resultText.innerHTML =
+        `Nel tuo pacco (${getCaseName(state.myCaseId)}) c’era: ${my.prizeLabel}.`;
+
+      state.phase = "ended";
+      renderAll();
+      finishServer("completed");
+      return;
+    }
+
     showRevealModal(
       getCaseName(c.id),
       c.prizeLabel,
@@ -540,17 +722,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
       openedCount: 0,
       offersMade: 0,
-
       swapsLeft: CONFIG.maxSwaps,
 
       offerDone: new Set(),
       swapDone: new Set(),
       finalSwapDone: false,
-
       nextForced: [],
 
       allPrizes,
       removedPrizeIds: new Set(),
+
+      access: { code: null, sessionId: null },
 
       cases: Array.from({length:CONFIG.casesCount}, (_,i)=>({
         id:i+1,
@@ -573,7 +755,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     renderAll();
     openAccessGate();
-    return;
   }
 
   ui.btnNew.addEventListener("click", newGame);
