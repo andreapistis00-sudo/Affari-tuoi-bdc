@@ -1,22 +1,14 @@
 :root{
-  /* Base TV */
   --bg0:#040610;
   --bg1:#050A1C;
-  --panel: rgba(255,255,255,.06);
   --text: #F5F7FF;
   --muted: rgba(245,247,255,.78);
-  --border: rgba(255,255,255,.14);
   --shadow: 0 22px 75px rgba(0,0,0,.60);
   --radius: 18px;
 
-  /* Affari Tuoi-ish */
   --atBlue: rgba(25, 90, 255, .95);
-  --atBlueSoft: rgba(25, 90, 255, .22);
   --atGold: rgba(255, 204, 64, .98);
-  --atGoldSoft: rgba(255, 204, 64, .20);
   --atRed: rgba(255, 60, 80, .92);
-  --atRedSoft: rgba(255, 60, 80, .18);
-  --atCyan: rgba(80, 220, 255, .85);
 }
 
 *{ box-sizing:border-box; }
@@ -38,14 +30,13 @@ body.at::before{
   position:fixed;
   inset:0;
   pointer-events:none;
-  background:
-    repeating-linear-gradient(
-      to bottom,
-      rgba(255,255,255,.035) 0px,
-      rgba(255,255,255,.035) 1px,
-      transparent 2px,
-      transparent 6px
-    );
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(255,255,255,.035) 0px,
+    rgba(255,255,255,.035) 1px,
+    transparent 2px,
+    transparent 6px
+  );
   opacity:.18;
   mix-blend-mode: overlay;
 }
@@ -112,13 +103,12 @@ body.at::before{
 }
 .liveBadge::before{
   content:"";
-  width:8px;
-  height:8px;
-  border-radius:50%;
+  width:8px;height:8px;border-radius:50%;
   background: rgba(255,60,80,.95);
   box-shadow: 0 0 0 4px rgba(255,60,80,.15);
 }
 
+/* Chips */
 .status{ display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-end; }
 .chip{
   min-width:180px;
@@ -165,17 +155,14 @@ body.at::before{
   position:relative;
   overflow:hidden;
 }
-
 .panel::before{
   content:"";
   position:absolute;
   inset:-1px;
   pointer-events:none;
-  background:
-    linear-gradient(90deg, rgba(255,204,64,.10), transparent 35%, rgba(25,90,255,.08));
+  background: linear-gradient(90deg, rgba(255,204,64,.10), transparent 35%, rgba(25,90,255,.08));
   opacity:.9;
 }
-
 .panel h2{
   margin:0 0 10px;
   font-size:16px;
@@ -192,7 +179,6 @@ body.at::before{
   overflow:auto;
   padding-right:6px;
 }
-
 .prizeItem{
   display:flex; justify-content:space-between; align-items:center;
   padding:10px 10px;
@@ -202,12 +188,7 @@ body.at::before{
     radial-gradient(260px 90px at 20% 0%, rgba(255,204,64,.08), transparent 60%),
     linear-gradient(180deg, rgba(255,255,255,.07), rgba(0,0,0,.18));
 }
-.prizeItem.out{
-  opacity:.45;
-  text-decoration:line-through;
-  filter:saturate(.55);
-}
-
+.prizeItem.out{ opacity:.45; text-decoration:line-through; filter:saturate(.55); }
 .tag{
   font-size:11px;
   padding:4px 9px;
@@ -232,11 +213,8 @@ body.at::before{
 .dot-mid{ background: rgba(255,204,64,.92); }
 .dot-high{ background: rgba(255,60,80,.92); }
 
-/* Board header */
-.boardHeader{
-  display:flex; align-items:center; justify-content:space-between; gap:10px;
-}
-
+/* Hint */
+.boardHeader{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
 .hint{
   color:rgba(245,247,255,.90);
   font-size:12px;
@@ -254,14 +232,8 @@ body.at::before{
     rgba(0,0,0,.22);
 }
 
-/* Case grid */
-.caseGrid{
-  margin-top:12px;
-  display:grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap:10px;
-}
-
+/* Cases */
+.caseGrid{ margin-top:12px; display:grid; grid-template-columns: repeat(5, 1fr); gap:10px; }
 .caseBtn{
   position:relative;
   border-radius:18px;
@@ -298,9 +270,7 @@ body.at::before{
 
 .caseBtn.mine{
   outline:2px solid rgba(255,204,64,.88);
-  box-shadow:
-    0 0 0 6px rgba(255,204,64,.14),
-    0 22px 62px rgba(0,0,0,.48);
+  box-shadow: 0 0 0 6px rgba(255,204,64,.14), 0 22px 62px rgba(0,0,0,.48);
 }
 .caseBtn.mine::before{
   content:"TUO";
@@ -329,7 +299,6 @@ body.at::before{
 
 /* Buttons */
 .actions{ margin-top:12px; display:flex; gap:10px; flex-wrap:wrap; }
-
 .btn{
   border:1px solid rgba(255,255,255,.18);
   background: rgba(25,90,255,.18);
@@ -346,26 +315,19 @@ body.at::before{
 .btn:hover{ transform: translateY(-1px); box-shadow: 0 18px 50px rgba(0,0,0,.42); }
 .btn:disabled{ opacity:.4; cursor:not-allowed; transform:none; box-shadow:none; }
 .btn.secondary{
-  background:
-    radial-gradient(240px 70px at 20% 0%, rgba(255,255,255,.08), transparent 60%),
-    rgba(255,255,255,.06);
+  background: radial-gradient(240px 70px at 20% 0%, rgba(255,255,255,.08), transparent 60%), rgba(255,255,255,.06);
 }
 .btn.danger{
-  background:
-    radial-gradient(260px 90px at 20% 0%, rgba(255,60,80,.16), transparent 60%),
-    rgba(255,60,80,.12);
+  background: radial-gradient(260px 90px at 20% 0%, rgba(255,60,80,.16), transparent 60%), rgba(255,60,80,.12);
   border-color: rgba(255,60,80,.32);
 }
 .btn.ghost{ background: transparent; box-shadow:none; }
-
 .btn.atPrimary{
-  background:
-    radial-gradient(280px 80px at 25% 0%, rgba(255,204,64,.28), transparent 60%),
-    rgba(255,204,64,.14);
+  background: radial-gradient(280px 80px at 25% 0%, rgba(255,204,64,.28), transparent 60%), rgba(255,204,64,.14);
   border-color: rgba(255,204,64,.52);
 }
 
-/* Offer panel */
+/* Offer */
 .offerBox{
   border:1px solid rgba(255,255,255,.18);
   border-radius:18px;
@@ -378,14 +340,11 @@ body.at::before{
     radial-gradient(320px 120px at 80% 0%, rgba(255,204,64,.10), transparent 60%),
     rgba(0,0,0,.22);
 }
-
 .bankerRow{ display:flex; gap:10px; align-items:center; margin-bottom:10px; }
 .bankerAvatar{
   width:44px; height:44px; border-radius:14px;
   display:grid; place-items:center;
-  background:
-    radial-gradient(160px 60px at 30% 0%, rgba(255,204,64,.16), transparent 60%),
-    rgba(255,255,255,.08);
+  background: radial-gradient(160px 60px at 30% 0%, rgba(255,204,64,.16), transparent 60%), rgba(255,255,255,.08);
   border:1px solid rgba(255,255,255,.18);
   font-size:20px;
 }
@@ -415,9 +374,7 @@ body.at::before{
   font-size:32px;
   font-weight:950;
   margin-top:6px;
-  text-shadow:
-    0 18px 42px rgba(0,0,0,.55),
-    0 0 22px rgba(255,204,64,.16);
+  text-shadow: 0 18px 42px rgba(0,0,0,.55), 0 0 22px rgba(255,204,64,.16);
 }
 
 .offerMeta{
@@ -433,12 +390,7 @@ body.at::before{
   background: rgba(255,255,255,.04);
   display:flex; justify-content:space-between; align-items:center;
 }
-.offerMeta span{
-  color:rgba(245,247,255,.78);
-  font-size:12px;
-  letter-spacing:.10em;
-  text-transform:uppercase;
-}
+.offerMeta span{ color:rgba(245,247,255,.78); font-size:12px; letter-spacing:.10em; text-transform:uppercase; }
 .offerMeta .only{ grid-column: 1 / -1; }
 
 /* Result */
@@ -447,9 +399,7 @@ body.at::before{
   padding:12px;
   border-radius:18px;
   border:1px solid rgba(70, 255, 170, .52);
-  background:
-    radial-gradient(320px 90px at 25% 0%, rgba(70, 255, 170, .16), transparent 60%),
-    rgba(70, 255, 170, .10);
+  background: radial-gradient(320px 90px at 25% 0%, rgba(70, 255, 170, .16), transparent 60%), rgba(70, 255, 170, .10);
 }
 .result p{ margin:0; color:rgba(245,247,255,.86); white-space:pre-line; }
 
@@ -465,7 +415,7 @@ body.at::before{
   flex-wrap:wrap;
 }
 
-/* MODAL */
+/* Modal base */
 .modal{
   position:fixed;
   inset:0;
@@ -496,9 +446,7 @@ body.at::before{
 
 .atCard{
   border-color: rgba(255,204,64,.24);
-  box-shadow:
-    0 28px 96px rgba(0,0,0,.66),
-    0 0 0 1px rgba(255,204,64,.10) inset;
+  box-shadow: 0 28px 96px rgba(0,0,0,.66), 0 0 0 1px rgba(255,204,64,.10) inset;
 }
 
 .modalTop{
@@ -507,7 +455,6 @@ body.at::before{
   justify-content:space-between;
   padding: 14px 14px 10px;
 }
-
 .modalBadge{
   font-weight: 950;
   letter-spacing:.18em;
@@ -518,11 +465,8 @@ body.at::before{
   background: rgba(25,90,255,.18);
   text-transform:uppercase;
 }
-
 .atBadge{
-  background:
-    radial-gradient(200px 70px at 30% 0%, rgba(255,204,64,.24), transparent 60%),
-    rgba(255,204,64,.10);
+  background: radial-gradient(200px 70px at 30% 0%, rgba(255,204,64,.24), transparent 60%), rgba(255,204,64,.10);
   border-color: rgba(255,204,64,.52);
   color: rgba(255,245,220,.98);
 }
@@ -539,10 +483,7 @@ body.at::before{
   transition: transform .12s ease, box-shadow .12s ease;
 }
 .modalClose:hover{ transform: translateY(-1px); box-shadow: 0 16px 44px rgba(0,0,0,.40); }
-.atClose{
-  border-color: rgba(255,204,64,.26);
-  background: rgba(0,0,0,.18);
-}
+.atClose{ border-color: rgba(255,204,64,.26); background: rgba(0,0,0,.18); }
 
 .modalBody{
   padding: 6px 18px 16px;
@@ -566,28 +507,21 @@ body.at::before{
 }
 
 .modalIcon{ font-size: 44px; margin-top: 6px; }
-.atIcon{
-  filter: drop-shadow(0 18px 44px rgba(0,0,0,.48));
-}
+.atIcon{ filter: drop-shadow(0 18px 44px rgba(0,0,0,.48)); }
 
 .modalPlace{ margin-top: 10px; font-size: 19px; font-weight: 950; letter-spacing:.06em; text-transform:uppercase; }
 .modalPrize{ margin-top: 8px; font-size: 28px; font-weight: 950; }
-.modalSub{
-  margin-top: 10px;
-  color: rgba(245,247,255,.82);
-  font-size: 12px;
-  letter-spacing:.10em;
-  text-transform:uppercase;
-}
+.modalSub{ margin-top: 10px; color: rgba(245,247,255,.82); font-size: 12px; letter-spacing:.10em; text-transform:uppercase; }
 
-.atTitle{
-  text-shadow: 0 18px 44px rgba(0,0,0,.55);
-}
+.atTitle{ text-shadow: 0 18px 44px rgba(0,0,0,.55); }
 .atPrize{
   letter-spacing:.08em;
-  text-shadow:
-    0 18px 44px rgba(0,0,0,.62),
-    0 0 22px rgba(255,204,64,.14);
+  text-shadow: 0 18px 44px rgba(0,0,0,.62), 0 0 22px rgba(255,204,64,.14);
+}
+.atOfferPrize{
+  font-size: 34px;
+  letter-spacing:.10em;
+  text-shadow: 0 22px 54px rgba(0,0,0,.68), 0 0 26px rgba(255,204,64,.18);
 }
 
 .modalActions{
@@ -611,9 +545,7 @@ body.modal-open{ overflow: hidden; }
 }
 .swapBtn{
   border:1px solid rgba(255,255,255,.18);
-  background:
-    radial-gradient(240px 80px at 20% 0%, rgba(25,90,255,.14), transparent 60%),
-    rgba(255,255,255,.06);
+  background: radial-gradient(240px 80px at 20% 0%, rgba(25,90,255,.14), transparent 60%), rgba(255,255,255,.06);
   color: var(--text);
   border-radius: 16px;
   padding: 12px 10px;
@@ -625,7 +557,7 @@ body.modal-open{ overflow: hidden; }
 .swapBtn strong{ display:block; font-size:12px; letter-spacing:.12em; text-transform:uppercase; }
 .swapBtn span{ display:block; margin-top:6px; color:rgba(245,247,255,.78); font-size:11px; letter-spacing:.14em; text-transform:uppercase; }
 
-/* PIN */
+/* PIN input (mascherato) */
 .accessForm{
   margin-top: 16px;
   display:flex;
@@ -634,25 +566,19 @@ body.modal-open{ overflow: hidden; }
   justify-content:center;
   flex-wrap:wrap;
 }
-
 .accessInput{
   width: min(340px, 100%);
   border: 1px solid rgba(255,204,64,.30);
-  background:
-    radial-gradient(300px 90px at 25% 0%, rgba(255,204,64,.14), transparent 60%),
-    rgba(0,0,0,.24);
+  background: radial-gradient(300px 90px at 25% 0%, rgba(255,204,64,.14), transparent 60%), rgba(0,0,0,.24);
   color: var(--text);
   border-radius: 16px;
   padding: 14px 14px;
   font-weight: 950;
   outline: none;
   box-shadow: 0 18px 54px rgba(0,0,0,.44);
-
   letter-spacing: .34em;
   text-align:center;
-
-  /* ✅ maschera caratteri (iOS/Safari) */
-  -webkit-text-security: disc;
+  -webkit-text-security: disc; /* iOS/Safari: pallini */
   caret-color: var(--text);
 }
 .accessInput::placeholder{
@@ -674,85 +600,34 @@ body.modal-open{ overflow: hidden; }
   text-transform:uppercase;
 }
 
-/* Offer modal number */
-.atOfferPrize{
-  font-size: 34px;
-  letter-spacing:.10em;
-  text-shadow:
-    0 22px 54px rgba(0,0,0,.68),
-    0 0 26px rgba(255,204,64,.18);
-}
-
 /* Offer buttons */
 .btn.atAccept{
-  background:
-    radial-gradient(260px 90px at 20% 0%, rgba(70,255,170,.18), transparent 60%),
-    rgba(70,255,170,.12);
+  background: radial-gradient(260px 90px at 20% 0%, rgba(70,255,170,.18), transparent 60%), rgba(70,255,170,.12);
   border-color: rgba(70,255,170,.58);
 }
 .btn.atReject{
-  background:
-    radial-gradient(260px 90px at 20% 0%, rgba(255,60,80,.18), transparent 60%),
-    rgba(255,60,80,.12);
+  background: radial-gradient(260px 90px at 20% 0%, rgba(255,60,80,.18), transparent 60%), rgba(255,60,80,.12);
   border-color: rgba(255,60,80,.60);
 }
 
-/* Animations */
-@keyframes atPop{
-  0%{ transform: translateY(8px) scale(.985); opacity:.0; }
-  100%{ transform: translateY(0) scale(1); opacity:1; }
-}
-@keyframes atPulse{
-  0%,100%{ transform: scale(1); }
-  50%{ transform: scale(1.04); }
-}
-@keyframes atShake{
-  0%{ transform: translateX(0); }
-  20%{ transform: translateX(-8px); }
-  40%{ transform: translateX(8px); }
-  60%{ transform: translateX(-6px); }
-  80%{ transform: translateX(6px); }
-  100%{ transform: translateX(0); }
-}
-
-.modalCard.tvEnter{ animation: atPop .18s ease-out both; }
-.modalCard.shake{ animation: atShake .28s ease-in-out; }
-.tvPulse{ animation: atPulse .36s ease-in-out; }
-
-/* MOBILE */
+/* Mobile */
 @media (max-width: 980px){
   .layout{ grid-template-columns: 1fr; }
 
-  .topbar{
-    flex-direction: column;
-    align-items: stretch;
-    gap: 12px;
-  }
+  .topbar{ flex-direction: column; align-items: stretch; gap: 12px; }
   .status{ justify-content:flex-start; }
-  .chip{
-    min-width: 0;
-    flex: 1 1 auto;
-  }
+  .chip{ min-width: 0; flex: 1 1 auto; }
 
   .board{ order: 1; }
   .offer{ order: 2; }
   .prizes{ order: 3; }
 
-  .caseGrid{
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-  }
-  .caseBtn{
-    min-height: 94px;
-    padding: 16px 10px;
-  }
+  .caseGrid{ grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .caseBtn{ min-height: 94px; padding: 16px 10px; }
   .caseBtn .num{ font-size: 13px; }
   .caseBtn .small{ font-size: 11px; }
 
-  .actions{
-    flex-direction: column;
-    gap: 10px;
-  }
+  .actions{ flex-direction: column; gap: 10px; }
   .actions .btn{ width: 100%; }
 
   .prizeGrid{ max-height: 260px; }
