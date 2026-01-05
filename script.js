@@ -23,8 +23,31 @@ document.addEventListener("DOMContentLoaded", () => {
       "Sconto 15% bdc - €5.000","Colazione 2x1 - €10.000","Sconto 30% bdc - €15.000","Colazione x2 - €20.000","Aperitivo 2x4 - €30.000",
       "Aperitivo x2 - €50.000","Sconto 50% Bdc - €75.000 ","1 Bottiglia di vino - €100.000","Giro Precedente gratis - €200.000","Giro preced. + Bottiglia - €300.000"
     ],
+    
+    offerLabels: [
+  "Patatine piccole",
+  "Olive",
+  "Tramezzino",
+  "Toast",
+  "Panino",
+  "Piadina",
+  "Focaccia farcita",
+  "Bruschette",
+  "Mini pizza",
+  "Tagliere piccolo",
+  "Tagliere medio",
+  "Nachos con salsa",
+  "Dolce della casa",
+  "Tiramisù",
+  "Crostata",
+  "Affogato al caffè",
+  "Granita grande",
+  "Frullato",
+  "Degustazione stuzzichi",
+  "Apericena completa"
+],
 
-    // valori interni per offerta (non mostrati)
+     // valori interni per offerta (non mostrati)
     prizeValues: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20],
 
     offerMoments: [5, 15],
@@ -130,8 +153,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function setHint(t){ ui.hintText.textContent=t; }
   function setBankerLine(t){ ui.bankerLine.textContent=t; }
-  function renderOffer(v){ ui.offerValue.textContent = CONFIG.offerLabels[v - 1];
- }
+  function renderOffer(v){
+  if (v == null) return;
+
+  const idx = Math.max(0, Math.min(v - 1, CONFIG.offerLabels.length - 1));
+  ui.offerValue.textContent = CONFIG.offerLabels[idx];
+}
+
 
   /* ===== MODAL BASE (lock scroll) ===== */
   function openModal(modalEl){
