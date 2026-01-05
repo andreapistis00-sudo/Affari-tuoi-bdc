@@ -2,10 +2,7 @@
 <html lang="it">
   <head>
     <meta charset="UTF-8" />
-    <meta
-  name="viewport"
-  content="width=device-width, initial-scale=1, user-scalable=yes, maximum-scale=5"
-/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>IL GIOCO DEI PACCHI</title>
     <link rel="stylesheet" href="style.css" />
   </head>
@@ -182,6 +179,14 @@
           <button class="btn secondary" id="swapSkip">Continua senza cambiare</button>
         </div>
       </div>
+    </div>
+
+    <!-- Controlli ZOOM (mobile/webview) -->
+    <div class="zoomControls" id="zoomControls" aria-label="Zoom pagina">
+      <button class="zoomBtn" id="zoomOut" type="button" aria-label="Riduci zoom">−</button>
+      <div class="zoomPct" id="zoomPct">100%</div>
+      <button class="zoomBtn" id="zoomIn" type="button" aria-label="Aumenta zoom">+</button>
+      <button class="zoomBtn reset" id="zoomReset" type="button" aria-label="Reset zoom">↺</button>
     </div>
 
     <!-- Firebase PRIMA del tuo script -->
