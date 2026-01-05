@@ -18,7 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
     ],
 
     prizeLabels: [
-      "Giro d'acqua - €00,00"," 1 Gusto gelato - €1,00","1 caffè - €5,00","1 Bibita - €10,00","1 Amaro - €20,00",
+      "Giro d'acqua - €0,00"," 1 Gusto gelato - €1,00","1 caffè - €5,00","1 Bibita - €10,00","1 Amaro - €20,00",
       "1 Birra - €50,00","1 Calice di vino - €75,00","1 Coktail - €100,00","Colazione singola - €200,00","1 Kg di gelato - €500,00",
       "Sconto 15% bdc - €5.000","Colazione 2x1 - €10.000","Sconto 30% bdc - €15.000","Colazione x2 - €20.000","Aperitivo 2x4 - €30.000",
       "Aperitivo x2 - €50.000","Sconto 50% Bdc - €75.000 ","1 Bottiglia di vino - €100.000","Giro Precedente gratis - €200.000","Giro preced. + Bottiglia - €300.000"
@@ -130,7 +130,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function setHint(t){ ui.hintText.textContent=t; }
   function setBankerLine(t){ ui.bankerLine.textContent=t; }
-  function renderOffer(v){ ui.offerValue.textContent=formatPoints(v); }
+  function renderOffer(v){ ui.offerValue.textContent = CONFIG.offerLabels[v - 1];
+ }
 
   /* ===== MODAL BASE (lock scroll) ===== */
   function openModal(modalEl){
