@@ -36,6 +36,8 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   let state = null;
+  let scrollY = 0;
+
   const $ = (id) => document.getElementById(id);
 
   const ui = {
