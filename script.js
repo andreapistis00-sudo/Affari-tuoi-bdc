@@ -24,12 +24,10 @@ document.addEventListener("DOMContentLoaded", () => {
     // valori interni solo per calcolare l’offerta (non mostrati)
     prizeValues: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20],
 
-    // ✅ MOMENTI SCELTI DA TE
-    offerMoments: [5, 15],       // 1ª e 2ª offerta
-    swapMoments: [10],           // 1° cambio
-    finalSwapAtTwoLeft: true,    // 2° cambio quando restano 2 pacchi
+    offerMoments: [5, 15],
+    swapMoments: [10],
+    finalSwapAtTwoLeft: true,
 
-    // moltiplicatori per 1ª e 2ª offerta (puoi ritoccarli)
     offerMultipliers: [0.62, 0.82],
 
     maxSwaps: 2
@@ -38,9 +36,8 @@ document.addEventListener("DOMContentLoaded", () => {
   let state = null;
   const $ = (id) => document.getElementById(id);
 
-  // ✅ Desktop fisso (1200px) + scala automatica + zoom manuale (+ / -)
+  // Desktop fisso (1200px) + scala automatica + zoom manuale
   let userZoom = Number(localStorage.getItem("userZoom") || "1");
-
   function clamp(n, min, max){ return Math.max(min, Math.min(max, n)); }
 
   function applyAutoScale(){
@@ -51,7 +48,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // scala finale = scala automatica * zoom utente
     const finalScale = clamp(baseScale * userZoom, 0.55, 1.5);
-
     document.documentElement.style.setProperty("--ui-scale", String(finalScale));
 
     const pctEl = document.getElementById("zoomPct");
@@ -110,13 +106,11 @@ document.addEventListener("DOMContentLoaded", () => {
     resultTitle: $("resultTitle"),
     resultText: $("resultText"),
 
-    // pick
     pickModal: $("pickModal"),
     pickGrid: $("pickGrid"),
     pickClose: $("pickClose"),
     pickRandom: $("pickRandom"),
 
-    // reveal
     revealModal: $("revealModal"),
     revealPlace: $("revealPlace"),
     revealPrize: $("revealPrize"),
@@ -124,7 +118,6 @@ document.addEventListener("DOMContentLoaded", () => {
     revealOk: $("revealOk"),
     revealClose: $("revealClose"),
 
-    // offer modal
     offerModal: $("offerModal"),
     offerModalValue: $("offerModalValue"),
     offerModalSub: $("offerModalSub"),
@@ -132,7 +125,6 @@ document.addEventListener("DOMContentLoaded", () => {
     offerReject: $("offerReject"),
     offerClose: $("offerClose"),
 
-    // swap
     swapModal: $("swapModal"),
     swapGrid: $("swapGrid"),
     swapMyCase: $("swapMyCase"),
@@ -252,12 +244,11 @@ document.addEventListener("DOMContentLoaded", () => {
     ui.myCaseLabel.textContent = state.myCaseId ? getCaseName(state.myCaseId) : "—";
     ui.casesLeft.textContent = String(remainingCaseIds().length);
 
-    // bottoni “vecchi” non usati
     ui.btnOffer.disabled = true;
     ui.btnDeal.disabled = true;
     ui.btnNoDeal.disabled = true;
 
-    ui.btnSwap.disabled = true; // swap obbligatorio via modal quando scatta
+    ui.btnSwap.disabled = true;
   }
 
   function renderAll(){
@@ -266,7 +257,7 @@ document.addEventListener("DOMContentLoaded", () => {
     renderCases();
   }
 
-  /* ===== MODAL: PICK (obbligatorio) ===== */
+  /* ===== MODAL: PICK ===== */
   function showPickModal(){
     ui.pickGrid.innerHTML = "";
     state.cases.slice().sort((a,b)=>a.id-b.id).forEach(c=>{
@@ -287,7 +278,6 @@ document.addEventListener("DOMContentLoaded", () => {
     renderAll();
   }
 
-  // Se vuoi che la scelta sia obbligatoria, non chiudiamo: diamo solo feedback.
   ui.pickClose.addEventListener("click", () => {
     setHint("Devi scegliere una località per iniziare.");
   });
@@ -309,7 +299,6 @@ document.addEventListener("DOMContentLoaded", () => {
   function hideRevealModal(){
     closeModal(ui.revealModal);
 
-    // se c’era un’azione obbligatoria “in coda”, la eseguo ora (FIFO)
     if(state.nextForced && state.nextForced.length){
       const next = state.nextForced.shift();
       if(next.type === "offer") showOfferModalMandatory(next.offer);
@@ -321,7 +310,7 @@ document.addEventListener("DOMContentLoaded", () => {
   ui.revealClose.addEventListener("click", hideRevealModal);
   ui.revealModal.addEventListener("click", (e)=>{ if(e.target===ui.revealModal) hideRevealModal(); });
 
-  /* ===== MODAL: SWAP (obbligatorio) ===== */
+  /* ===== MODAL: SWAP ===== */
   function showSwapModalMandatory(){
     if(state.swapsLeft <= 0) return;
 
@@ -369,7 +358,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  /* ===== MODAL: OFFERTA (obbligatorio) ===== */
+  /* ===== MODAL: OFFERTA ===== */
   function showOfferModalMandatory(offer){
     ui.offerModalValue.textContent = formatPoints(offer);
     ui.offerModalSub.textContent = "Devi scegliere: accetta o rifiuta.";
@@ -379,7 +368,6 @@ document.addEventListener("DOMContentLoaded", () => {
   function acceptOffer(){
     closeModal(ui.offerModal);
 
-    // fine partita (semplice): mostra cosa c'era nel tuo pacco
     const my = state.cases.find(c=>c.id===state.myCaseId);
     setBankerLine("Offerta accettata!");
     setHint("Partita finita.");
@@ -426,7 +414,6 @@ document.addEventListener("DOMContentLoaded", () => {
     state.offersMade += 1;
     state.offerDone.add(state.openedCount);
 
-    // coda azioni obbligatorie
     if(!state.nextForced) state.nextForced = [];
     if(!ui.revealModal.hidden){
       state.nextForced.push({ type: "offer", offer });
@@ -444,7 +431,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if(kindKey === "opened10") state.swapDone.add(10);
     if(kindKey === "final2") state.finalSwapDone = true;
 
-    // coda azioni obbligatorie
     if(!state.nextForced) state.nextForced = [];
     if(!ui.revealModal.hidden){
       state.nextForced.push({ type: "swap" });
@@ -473,14 +459,12 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    // apri pacco
     c.opened = true;
     state.removedPrizeIds.add(c.prizeId);
     state.openedCount += 1;
 
     const remaining = remainingCaseIds().length;
 
-    // mostra premio uscito
     showRevealModal(
       getCaseName(c.id),
       c.prizeLabel,
@@ -489,7 +473,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     renderAll();
 
-    // --- MOMENTI SPECIALI (come hai deciso tu) ---
     if (CONFIG.offerMoments.includes(state.openedCount) && !state.offerDone.has(state.openedCount)) {
       queueOffer();
       return;
@@ -554,13 +537,11 @@ document.addEventListener("DOMContentLoaded", () => {
       }))
     };
 
-    // reset UI
     ui.resultBox.hidden = true;
     renderOffer(null);
     setBankerLine("Scegli il tuo pacco.");
     setHint("Scegli la tua località (il tuo pacco).");
 
-    // chiudi modali
     closeModal(ui.revealModal);
     closeModal(ui.offerModal);
     closeModal(ui.swapModal);
@@ -571,8 +552,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   ui.btnNew.addEventListener("click", newGame);
-
-  // bottone swap non serve (modal obbligatorio quando scatta), lo lasciamo spento
   ui.btnSwap.addEventListener("click", () => {});
 
   newGame();
