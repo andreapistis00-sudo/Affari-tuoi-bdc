@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
     bankerName: "Il Banco",
     currency: "punti",
 
-    // ✅ PIN locale (quello che inserirai sul telefono clienti)
+    // ✅ PIN locale
     accessPin: "4827",
 
     casesCount: 20,
@@ -33,6 +33,21 @@ document.addEventListener("DOMContentLoaded", () => {
     offerMultipliers: [0.62, 0.82],
     maxSwaps: 2
   };
+
+  // ✅ Persistenza partita (localStorage)
+  const STORAGE_KEY = "paccoGameState_v1";
+  const CONFIG_SIGNATURE = JSON.stringify({
+    casesCount: CONFIG.casesCount,
+    caseNames: CONFIG.caseNames,
+    prizeLabels: CONFIG.prizeLabels,
+    prizeValues: CONFIG.prizeValues,
+    offerMoments: CONFIG.offerMoments,
+    swapMoments: CONFIG.swapMoments,
+    finalSwapAtTwoLeft: CONFIG.finalSwapAtTwoLeft,
+    offerMultipliers: CONFIG.offerMultipliers,
+    maxSwaps: CONFIG.maxSwaps,
+    currency: CONFIG.currency
+  });
 
   let state = null;
   let scrollY = 0;
@@ -65,7 +80,7 @@ document.addEventListener("DOMContentLoaded", () => {
     resultTitle: $("resultTitle"),
     resultText: $("resultText"),
 
-    // ✅ PIN modal
+    // PIN modal
     pinModal: $("pinModal"),
     pinInput: $("pinInput"),
     pinSubmit: $("pinSubmit"),
@@ -132,6 +147,84 @@ document.addEventListener("DOMContentLoaded", () => {
   function setBankerLine(t){ ui.bankerLine.textContent=t; }
   function renderOffer(v){ ui.offerValue.textContent=formatPoints(v); }
 
+  /* ===== PERSISTENZA ===== */
+  function serializeState(s){
+    return {
+      __sig: CONFIG_SIGNATURE,
+      phase: s.phase,
+      myCaseId: s.myCaseId,
+      lastOffer: s.lastOffer,
+
+      openedCount: s.openedCount,
+      offersMade: s.offersMade,
+      swapsLeft: s.swapsLeft,
+
+      offerDone: Array.from(s.offerDone || []),
+      swapDone: Array.from(s.swapDone || []),
+      finalSwapDone: !!s.finalSwapDone,
+      nextForced: Array.isArray(s.nextForced) ? s.nextForced : [],
+
+      allPrizes: s.allPrizes,
+      removedPrizeIds: Array.from(s.removedPrizeIds || []),
+
+      access: s.access || { unlocked: false },
+
+      cases: s.cases
+    };
+  }
+
+  function deserializeState(obj){
+    if(!obj || obj.__sig !== CONFIG_SIGNATURE) return null;
+
+    const s = {
+      phase: obj.phase || "playing",
+      myCaseId: obj.myCaseId || null,
+      lastOffer: obj.lastOffer ?? null,
+
+      openedCount: Number(obj.openedCount || 0),
+      offersMade: Number(obj.offersMade || 0),
+      swapsLeft: Number(obj.swapsLeft ?? CONFIG.maxSwaps),
+
+      offerDone: new Set(obj.offerDone || []),
+      swapDone: new Set(obj.swapDone || []),
+      finalSwapDone: !!obj.finalSwapDone,
+      nextForced: Array.isArray(obj.nextForced) ? obj.nextForced : [],
+
+      allPrizes: Array.isArray(obj.allPrizes) ? obj.allPrizes : [],
+      removedPrizeIds: new Set(obj.removedPrizeIds || []),
+
+      access: obj.access || { unlocked: false },
+
+      cases: Array.isArray(obj.cases) ? obj.cases : []
+    };
+
+    if(s.cases.length !== CONFIG.casesCount) return null;
+    return s;
+  }
+
+  function saveGame(){
+    try{
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(serializeState(state)));
+    }catch(e){
+      // storage pieno o disabilitato: continua comunque
+    }
+  }
+
+  function loadGame(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(!raw) return null;
+      const obj = JSON.parse(raw);
+      return deserializeState(obj);
+    }catch(e){
+      return null;
+    }
+  }
+
+  function clearSavedGame(){
+    try{ localStorage.removeItem(STORAGE_KEY); }catch(e){}
+  }
+
   /* ===== MODAL BASE (lock scroll) ===== */
   function openModal(modalEl){
     scrollY = window.scrollY;
@@ -194,12 +287,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function unlockGame(){
     state.access.unlocked = true;
+    saveGame();
+
     closeModal(ui.pinModal);
 
-    setBankerLine("Accesso OK. Scegli il tuo pacco.");
-    setHint("Scegli la tua località (il tuo pacco).");
-    renderAll();
-    showPickModal();
+    setBankerLine("Accesso OK.");
+    if(!state.myCaseId){
+      setHint("Scegli la tua località (il tuo pacco).");
+      renderAll();
+      showPickModal();
+    }else{
+      setHint("Continua la partita.");
+      renderAll();
+    }
   }
 
   function handlePinSubmit(){
@@ -319,6 +419,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function pickMyCase(id){
     state.myCaseId = id;
+    saveGame();
+
     closeModal(ui.pickModal);
     setBankerLine("Perfetto. Inizia ad aprire le località!");
     setHint("Apri una località.");
@@ -349,6 +451,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if(state.nextForced && state.nextForced.length){
       const next = state.nextForced.shift();
+      saveGame();
       if(next.type === "offer") showOfferModalMandatory(next.offer);
       if(next.type === "swap") showSwapModalMandatory();
     }
@@ -384,6 +487,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const oldId = state.myCaseId;
     state.myCaseId = newId;
     state.swapsLeft -= 1;
+    saveGame();
 
     closeModal(ui.swapModal);
     setBankerLine("Cambio pacco effettuato!");
@@ -427,6 +531,7 @@ document.addEventListener("DOMContentLoaded", () => {
       `Nel tuo pacco (${getCaseName(state.myCaseId)}) c’era: ${my.prizeLabel}.`;
 
     state.phase = "ended";
+    saveGame();
     renderAll();
   }
 
@@ -434,6 +539,7 @@ document.addEventListener("DOMContentLoaded", () => {
     closeModal(ui.offerModal);
     setBankerLine("Offerta rifiutata!");
     setHint("Continua ad aprire le località.");
+    saveGame();
     renderAll();
   }
 
@@ -471,6 +577,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     renderOffer(offer);
     setBankerLine("Il Banco ha fatto un’offerta!");
+    saveGame();
   }
 
   function queueSwap(kindKey){
@@ -487,6 +594,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     setBankerLine("Momento CAMBIO PACCO!");
+    saveGame();
   }
 
   /* ===== CLICK PACCHI ===== */
@@ -494,6 +602,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if(state.phase === "ended") return;
     if(isAnyModalOpen()) return;
 
+    // blocco finché non sbloccato
     if(!state.access.unlocked){
       openPinGate();
       return;
@@ -518,6 +627,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const remaining = remainingCaseIds().length;
 
+    // fine naturale quando resta solo il tuo pacco
     if(remaining === 1){
       const my = state.cases.find(x=>x.id===state.myCaseId);
 
@@ -530,6 +640,7 @@ document.addEventListener("DOMContentLoaded", () => {
         `Nel tuo pacco (${getCaseName(state.myCaseId)}) c’era: ${my.prizeLabel}.`;
 
       state.phase = "ended";
+      saveGame();
       renderAll();
       return;
     }
@@ -540,6 +651,7 @@ document.addEventListener("DOMContentLoaded", () => {
       `Pacchi aperti: ${state.openedCount} • Pacchi rimasti: ${remaining}`
     );
 
+    saveGame();
     renderAll();
 
     if (CONFIG.offerMoments.includes(state.openedCount) && !state.offerDone.has(state.openedCount)) {
@@ -617,12 +729,63 @@ document.addEventListener("DOMContentLoaded", () => {
     closeModal(ui.swapModal);
     closeModal(ui.pickModal);
 
+    saveGame();
     renderAll();
     openPinGate();
   }
 
-  ui.btnNew.addEventListener("click", newGame);
+  ui.btnNew.addEventListener("click", () => {
+    // Nuova partita = reset totale (anche salvataggio)
+    clearSavedGame();
+    newGame();
+  });
   ui.btnSwap.addEventListener("click", () => {});
 
-  newGame();
+  /* ===== BOOT: prova a riprendere partita ===== */
+  function boot(){
+    const saved = loadGame();
+    if(saved){
+      state = saved;
+
+      closeModal(ui.revealModal);
+      closeModal(ui.offerModal);
+      closeModal(ui.swapModal);
+      closeModal(ui.pickModal);
+
+      ui.resultBox.hidden = (state.phase !== "ended");
+      if(state.phase === "ended"){
+        setBankerLine("Partita finita.");
+        setHint("Fine partita.");
+      }else{
+        setBankerLine("Partita ripresa.");
+        setHint("Continua ad aprire le località.");
+      }
+
+      renderOffer(state.lastOffer);
+      renderAll();
+
+      if(!state.access.unlocked){
+        openPinGate();
+      }else if(!state.myCaseId && state.phase !== "ended"){
+        showPickModal();
+      }
+      return;
+    }
+
+    newGame();
+  }
+
+  boot();
+
+  /* ===== PROTEZIONE USCITA PAGINA (popup di sistema) ===== */
+  window.addEventListener("beforeunload", (e) => {
+    if (!state) return;
+
+    // Mostra popup solo se la partita è in corso
+    if (state.phase !== "ended") {
+      e.preventDefault();
+      e.returnValue = "";
+      return "";
+    }
+  });
 });
