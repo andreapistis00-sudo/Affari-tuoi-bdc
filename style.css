@@ -23,6 +23,10 @@ body{
 
   /* ✅ evita overflow orizzontale dovuto a transform su .app */
   overflow-x: hidden;
+    display: flex;
+  justify-content: center;
+  align-items: flex-start;
+
 }
 
 /* ✅ Desktop base fisso 1200px + scala automatica */
