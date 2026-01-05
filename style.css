@@ -253,7 +253,8 @@ body{
   border: 1px solid var(--border);
   background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(0,0,0,.25));
   box-shadow: var(--shadow);
-  overflow:hidden;
+  overflow: visible;
+
 }
 .modalTop{
   display:flex;
