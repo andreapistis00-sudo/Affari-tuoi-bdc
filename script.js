@@ -5,6 +5,9 @@ document.addEventListener("DOMContentLoaded", () => {
     bankerName: "Il Banco",
     currency: "punti",
 
+    // ✅ PIN locale (quello che inserirai sul telefono clienti)
+    accessPin: "4827",
+
     casesCount: 20,
 
     caseNames: [
@@ -15,7 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
     ],
 
     prizeLabels: [
-      "Niente","Premio 2","Premio 3","Premio 4","Premio 5",
+      "Premio 1","Premio 2","Premio 3","Premio 4","Premio 5",
       "Premio 6","Premio 7","Premio 8","Premio 9","Premio 10",
       "Premio 11","Premio 12","Premio 13","Premio 14","Premio 15",
       "Premio 16","Premio 17","Premio 18","Premio 19","Premio 20"
@@ -61,6 +64,12 @@ document.addEventListener("DOMContentLoaded", () => {
     resultBox: $("resultBox"),
     resultTitle: $("resultTitle"),
     resultText: $("resultText"),
+
+    // ✅ PIN modal
+    pinModal: $("pinModal"),
+    pinInput: $("pinInput"),
+    pinSubmit: $("pinSubmit"),
+    pinError: $("pinError"),
 
     // pick
     pickModal: $("pickModal"),
@@ -139,6 +148,7 @@ document.addEventListener("DOMContentLoaded", () => {
     modalEl.hidden = true;
 
     const anyOpen =
+      !ui.pinModal.hidden ||
       !ui.pickModal.hidden ||
       !ui.revealModal.hidden ||
       !ui.offerModal.hidden ||
@@ -157,12 +167,73 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function isAnyModalOpen(){
     return (
+      !ui.pinModal.hidden ||
       !ui.pickModal.hidden ||
       !ui.revealModal.hidden ||
       !ui.offerModal.hidden ||
       !ui.swapModal.hidden
     );
   }
+
+  /* ===== PIN GATE ===== */
+  function showPinError(msg){
+    ui.pinError.hidden = !msg;
+    ui.pinError.textContent = msg || "";
+  }
+
+  function openPinGate(){
+    showPinError("");
+    ui.pinInput.value = "";
+    ui.pinSubmit.disabled = false;
+    openModal(ui.pinModal);
+
+    setBankerLine("Inserisci il PIN per giocare.");
+    setHint("Inserisci il PIN per iniziare.");
+    // focus leggero
+    setTimeout(()=>ui.pinInput && ui.pinInput.focus(), 50);
+  }
+
+  function unlockGame(){
+    state.access.unlocked = true;
+    closeModal(ui.pinModal);
+
+    setBankerLine("Accesso OK. Scegli il tuo pacco.");
+    setHint("Scegli la tua località (il tuo pacco).");
+    renderAll();
+    showPickModal();
+  }
+
+  function handlePinSubmit(){
+    const pin = String(ui.pinInput.value || "").trim();
+
+    if(!pin){
+      showPinError("Inserisci il PIN.");
+      return;
+    }
+
+    ui.pinSubmit.disabled = true;
+
+    if(pin !== CONFIG.accessPin){
+      showPinError("PIN errato.");
+      ui.pinSubmit.disabled = false;
+      ui.pinInput.focus();
+      ui.pinInput.select?.();
+      return;
+    }
+
+    showPinError("");
+    unlockGame();
+  }
+
+  ui.pinSubmit.addEventListener("click", handlePinSubmit);
+  ui.pinInput.addEventListener("keydown", (e)=>{
+    if(e.key === "Enter") handlePinSubmit();
+  });
+
+  // Blocca click su overlay per bypass
+  ui.pinModal.addEventListener("click", (e)=>{
+    if(e.target === ui.pinModal) showPinError("Accesso obbligatorio: inserisci il PIN.");
+  });
 
   /* ===== RENDER ===== */
   function prizeTierByValue(v){
@@ -425,6 +496,12 @@ document.addEventListener("DOMContentLoaded", () => {
     if(state.phase === "ended") return;
     if(isAnyModalOpen()) return;
 
+    // ✅ blocco totale finché non sbloccato
+    if(!state.access.unlocked){
+      openPinGate();
+      return;
+    }
+
     const c = state.cases.find(x=>x.id===id);
     if(!c || c.opened) return;
 
@@ -522,6 +599,8 @@ document.addEventListener("DOMContentLoaded", () => {
       allPrizes,
       removedPrizeIds: new Set(),
 
+      access: { unlocked: false },
+
       cases: Array.from({length:CONFIG.casesCount}, (_,i)=>({
         id:i+1,
         prizeId: shuffled[i].id,
@@ -534,8 +613,8 @@ document.addEventListener("DOMContentLoaded", () => {
     ui.resultBox.hidden = true;
     renderOffer(null);
 
-    setBankerLine("Scegli il tuo pacco.");
-    setHint("Scegli la tua località (il tuo pacco).");
+    setBankerLine("Inserisci il PIN per giocare.");
+    setHint("Inserisci il PIN per iniziare.");
 
     closeModal(ui.revealModal);
     closeModal(ui.offerModal);
@@ -543,7 +622,7 @@ document.addEventListener("DOMContentLoaded", () => {
     closeModal(ui.pickModal);
 
     renderAll();
-    showPickModal();
+    openPinGate();
   }
 
   ui.btnNew.addEventListener("click", newGame);
