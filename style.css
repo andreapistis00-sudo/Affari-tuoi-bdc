@@ -32,7 +32,7 @@ body{
 /* ✅ Desktop base fisso 1200px + scala automatica */
 .app{
   width: 1200px;
-  margin: 0 auto;
+  margin: 0;
   padding:18px;
 
   transform: scale(var(--ui-scale));
