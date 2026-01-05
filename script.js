@@ -157,7 +157,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const card = modalCardOf(modalEl);
     if(!card) return;
     card.classList.remove("tvEnter");
-    // reflow
     void card.offsetWidth;
     card.classList.add("tvEnter");
   }
@@ -645,7 +644,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if(state.phase === "ended") return;
     if(isAnyModalOpen()) return;
 
-    // blocco finché non sbloccato
     if(!state.access.unlocked){
       openPinGate();
       return;
@@ -670,7 +668,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const remaining = remainingCaseIds().length;
 
-    // fine naturale quando resta solo il tuo pacco
     if(remaining === 1){
       const my = state.cases.find(x=>x.id===state.myCaseId);
 
