@@ -24,14 +24,11 @@ document.addEventListener("DOMContentLoaded", () => {
     // valori interni solo per calcolare l’offerta (non mostrati)
     prizeValues: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20],
 
-    // ✅ MOMENTI SCELTI DA TE
-    offerMoments: [5, 15],       // 1ª e 2ª offerta
-    swapMoments: [10],           // 1° cambio
-    finalSwapAtTwoLeft: true,    // 2° cambio quando restano 2 pacchi
+    offerMoments: [5, 15],
+    swapMoments: [10],
+    finalSwapAtTwoLeft: true,
 
-    // moltiplicatori per 1ª e 2ª offerta (puoi ritoccarli)
     offerMultipliers: [0.62, 0.82],
-
     maxSwaps: 2
   };
 
@@ -127,41 +124,39 @@ document.addEventListener("DOMContentLoaded", () => {
   function setBankerLine(t){ ui.bankerLine.textContent=t; }
   function renderOffer(v){ ui.offerValue.textContent=formatPoints(v); }
 
-  /* ===== MODAL BASE ===== */
-    function openModal(modalEl){
-  scrollY = window.scrollY;
+  /* ===== MODAL BASE (iOS-safe body lock) ===== */
+  function openModal(modalEl){
+    scrollY = window.scrollY;
 
-  document.body.style.position = "fixed";
-  document.body.style.top = `-${scrollY}px`;
-  document.body.style.width = "100%";
+    // blocco scroll body anche su iOS
+    document.body.style.position = "fixed";
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.width = "100%";
 
-  modalEl.hidden = false;
-  document.body.classList.add("modal-open");
-}
-
+    modalEl.hidden = false;
+    document.body.classList.add("modal-open");
   }
-  
+
   function closeModal(modalEl){
-  modalEl.hidden = true;
+    modalEl.hidden = true;
 
-  const anyOpen =
-    !ui.pickModal.hidden ||
-    !ui.revealModal.hidden ||
-    !ui.offerModal.hidden ||
-    !ui.swapModal.hidden;
+    const anyOpen =
+      !ui.pickModal.hidden ||
+      !ui.revealModal.hidden ||
+      !ui.offerModal.hidden ||
+      !ui.swapModal.hidden;
 
-  if(!anyOpen){
-    document.body.classList.remove("modal-open");
+    if(!anyOpen){
+      document.body.classList.remove("modal-open");
 
-    document.body.style.position = "";
-    document.body.style.top = "";
-    document.body.style.width = "";
+      document.body.style.position = "";
+      document.body.style.top = "";
+      document.body.style.width = "";
 
-    window.scrollTo(0, scrollY);
+      window.scrollTo(0, scrollY);
+    }
   }
-}
 
-  }
   function isAnyModalOpen(){
     return (
       !ui.pickModal.hidden ||
@@ -229,12 +224,11 @@ document.addEventListener("DOMContentLoaded", () => {
     ui.myCaseLabel.textContent = state.myCaseId ? getCaseName(state.myCaseId) : "—";
     ui.casesLeft.textContent = String(remainingCaseIds().length);
 
-    // bottoni “vecchi” non usati
     ui.btnOffer.disabled = true;
     ui.btnDeal.disabled = true;
     ui.btnNoDeal.disabled = true;
 
-    ui.btnSwap.disabled = true; // swap obbligatorio via modal quando scatta
+    ui.btnSwap.disabled = true;
   }
 
   function renderAll(){
@@ -264,7 +258,6 @@ document.addEventListener("DOMContentLoaded", () => {
     renderAll();
   }
 
-  // scelta obbligatoria: non chiudiamo, diamo feedback
   ui.pickClose.addEventListener("click", () => {
     setHint("Devi scegliere una località per iniziare.");
   });
@@ -283,10 +276,10 @@ document.addEventListener("DOMContentLoaded", () => {
     ui.revealSub.textContent = subText || "Continua a giocare.";
     openModal(ui.revealModal);
   }
+
   function hideRevealModal(){
     closeModal(ui.revealModal);
 
-    // azioni obbligatorie “in coda”
     if(state.nextForced && state.nextForced.length){
       const next = state.nextForced.shift();
       if(next.type === "offer") showOfferModalMandatory(next.offer);
