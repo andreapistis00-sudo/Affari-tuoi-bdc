@@ -324,20 +324,57 @@ body.modal-open{ overflow:hidden; }
 }
 
 @media (max-width: 980px){
+  /* layout in colonna */
   .layout{ grid-template-columns: 1fr; }
 
-  .status .chip{ min-width: 160px; }
+  /* header più compatto */
+  .topbar{
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+  .status{
+    justify-content: flex-start;
+  }
+  .chip{
+    min-width: 0;
+    flex: 1 1 auto;
+  }
 
-  .caseGrid{ grid-template-columns: repeat(4, 1fr); }
+  /* ordine pannelli: gioco prima */
+  .board{ order: 1; }
+  .offer{ order: 2; }
+  .prizes{ order: 3; }
+
+  /* griglia pacchi più "tap-friendly" */
+  .caseGrid{
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+  .caseBtn{
+    min-height: 86px;
+    padding: 14px 10px;
+  }
+  .caseBtn .num{ font-size: 13px; }
+  .caseBtn .small{ font-size: 11px; }
+
+  /* pulsanti full width */
+  .actions{
+    flex-direction: column;
+    gap: 10px;
+  }
+  .actions .btn{ width: 100%; }
+
+  /* premi: scroll interno, non infinito */
+  .prizeGrid{ max-height: 260px; }
+
+  /* modali su mobile: un po' più larghi e scrollabili */
+  .modalCard{ width: min(560px, 100%); }
+  .modalBody{ padding: 10px 14px 14px; }
   .swapGrid{ grid-template-columns: repeat(2, 1fr); }
-
-  .panel{ padding: 12px; }
-  .caseBtn{ min-height: 74px; }
-
-  .btn{ width: 100%; }
-  .actions{ flex-direction: column; }
 }
 
 @media (max-width: 420px){
-  .caseGrid{ grid-template-columns: repeat(3, 1fr); }
+  .caseGrid{ grid-template-columns: repeat(2, 1fr); }
 }
+
