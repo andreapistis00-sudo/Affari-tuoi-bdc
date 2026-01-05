@@ -1,189 +1,199 @@
 <!DOCTYPE html>
 <html lang="it">
-
   <head>
-    <meta charset="UTF-8">
-    <link rel="stylesheet" href="style.css">
-<script src="script.js"></script>
-
-
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>IL GIOCO DEI PACCHI</title>
+    <link rel="stylesheet" href="style.css" />
   </head>
-    
+
   <body>
-  <div class="app">
-  <header class="topbar">
-    <div class="title">
-      <h1 id="gameTitle">IL GIOCO DEI PACCHI</h1>
-      <p id="subtitle">Scegli una località e prova a portarti a casa il premio migliore!</p>
-    </div>
+    <div class="app">
+      <header class="topbar">
+        <div class="title">
+          <h1 id="gameTitle">IL GIOCO DEI PACCHI</h1>
+          <p id="subtitle">Scegli una località e prova a portarti a casa il premio migliore!</p>
+        </div>
 
-    <div class="status">
-      <div class="chip">
-        <span>Pacchi aperti</span>
-        <strong id="openedLabel">0</strong>
-      </div>
-      <div class="chip">
-        <span>Il tuo pacco</span>
-        <strong id="myCaseLabel">—</strong>
-      </div>
-    </div>
-  </header>
-
-  <main class="layout">
-    <section class="panel prizes">
-      <h2>Premi</h2>
-      <div class="prizeGrid" id="prizeGrid"></div>
-      <div class="legend">
-        <span class="dot dot-low"></span> basso
-        <span class="dot dot-mid"></span> medio
-        <span class="dot dot-high"></span> alto
-      </div>
-    </section>
-
-    <section class="panel board">
-      <div class="boardHeader">
-        <h2>Località</h2>
-        <div class="hint" id="hintText">Scegli la tua località (il tuo pacco).</div>
-      </div>
-
-      <div class="caseGrid" id="caseGrid"></div>
-
-      <div class="actions">
-        <button class="btn secondary" id="btnNew">Nuova partita</button>
-        <button class="btn secondary" id="btnSwap" disabled>Cambia pacco</button>
-
-        <!-- non usati (offerta obbligatoria via modal) -->
-        <button class="btn" id="btnOffer" disabled>Vedi Offerta</button>
-        <button class="btn danger" id="btnDeal" disabled>ACCETTA</button>
-        <button class="btn ghost" id="btnNoDeal" disabled>RIFIUTA</button>
-      </div>
-    </section>
-
-    <section class="panel offer">
-      <h2>Offerta</h2>
-
-      <div class="offerBox">
-        <div class="bankerRow">
-          <div class="bankerAvatar" aria-hidden="true">💼</div>
-          <div>
-            <div class="bankerName" id="bankerName">Il Banco</div>
-            <div class="bankerLine" id="bankerLine">Sei pronto per l’offerta?</div>
+        <div class="status">
+          <div class="chip">
+            <span>Pacchi aperti</span>
+            <strong id="openedLabel">0</strong>
+          </div>
+          <div class="chip">
+            <span>Il tuo pacco</span>
+            <strong id="myCaseLabel">—</strong>
           </div>
         </div>
+      </header>
 
-        <div class="offerValue">
-          <div class="label">Ultima offerta</div>
-          <div class="value" id="offerValue">—</div>
-        </div>
-
-        <div class="offerMeta" id="offerMeta">
-          <div class="only">
-            <span>Pacchi rimasti</span><strong id="casesLeft">—</strong>
+      <main class="layout">
+        <section class="panel prizes">
+          <h2>Premi</h2>
+          <div class="prizeGrid" id="prizeGrid"></div>
+          <div class="legend">
+            <span class="dot dot-low"></span> basso
+            <span class="dot dot-mid"></span> medio
+            <span class="dot dot-high"></span> alto
           </div>
+        </section>
+
+        <section class="panel board">
+          <div class="boardHeader">
+            <h2>Località</h2>
+            <div class="hint" id="hintText">Scegli la tua località (il tuo pacco).</div>
+          </div>
+
+          <div class="caseGrid" id="caseGrid"></div>
+
+          <div class="actions">
+            <button class="btn secondary" id="btnNew">Nuova partita</button>
+            <button class="btn secondary" id="btnSwap" disabled>Cambia pacco</button>
+
+            <!-- non usati (offerta obbligatoria via modal) -->
+            <button class="btn" id="btnOffer" disabled>Vedi Offerta</button>
+            <button class="btn danger" id="btnDeal" disabled>ACCETTA</button>
+            <button class="btn ghost" id="btnNoDeal" disabled>RIFIUTA</button>
+          </div>
+        </section>
+
+        <section class="panel offer">
+          <h2>Offerta</h2>
+
+          <div class="offerBox">
+            <div class="bankerRow">
+              <div class="bankerAvatar" aria-hidden="true">💼</div>
+              <div>
+                <div class="bankerName" id="bankerName">Il Banco</div>
+                <div class="bankerLine" id="bankerLine">Sei pronto per l’offerta?</div>
+              </div>
+            </div>
+
+            <div class="offerValue">
+              <div class="label">Ultima offerta</div>
+              <div class="value" id="offerValue">—</div>
+            </div>
+
+            <div class="offerMeta" id="offerMeta">
+              <div class="only">
+                <span>Pacchi rimasti</span><strong id="casesLeft">—</strong>
+              </div>
+            </div>
+          </div>
+
+          <div class="result" id="resultBox" hidden>
+            <h3 id="resultTitle">Risultato</h3>
+            <p id="resultText"></p>
+          </div>
+        </section>
+      </main>
+
+      <footer class="footer">
+        <span id="footerText">Grafica mantenuta • Offerta/Cambio a momenti scelti • Valore atteso rimosso</span>
+      </footer>
+    </div>
+
+    <!-- MODAL: SCEGLI IL TUO PACCO (obbligatorio) -->
+    <div class="modal" id="pickModal" hidden>
+      <div class="modalCard" role="dialog" aria-modal="true" aria-labelledby="pickTitle">
+        <div class="modalTop">
+          <div class="modalBadge" id="pickTitle">SCEGLI IL TUO PACCO</div>
+          <button class="modalClose" id="pickClose" aria-label="Chiudi">✕</button>
+        </div>
+
+        <div class="modalBody">
+          <div class="modalIcon" aria-hidden="true">📦</div>
+          <div class="modalPlace">Scegli una località come tuo pacco personale.</div>
+          <div class="modalSub">Clicca una località per iniziare.</div>
+
+          <div class="swapGrid" id="pickGrid"></div>
+        </div>
+
+        <div class="modalActions">
+          <button class="btn secondary" id="pickRandom">Scelta casuale</button>
         </div>
       </div>
+    </div>
 
-      <div class="result" id="resultBox" hidden>
-        <h3 id="resultTitle">Risultato</h3>
-        <p id="resultText"></p>
+    <!-- MODAL: PREMIO USCITO -->
+    <div class="modal" id="revealModal" hidden>
+      <div class="modalCard" role="dialog" aria-modal="true" aria-labelledby="revealTitle">
+        <div class="modalTop">
+          <div class="modalBadge" id="revealTitle">PREMIO USCITO</div>
+          <button class="modalClose" id="revealClose" aria-label="Chiudi">✕</button>
+        </div>
+
+        <div class="modalBody">
+          <div class="modalIcon" aria-hidden="true">🎁</div>
+          <div class="modalPlace" id="revealPlace">—</div>
+          <div class="modalPrize" id="revealPrize">—</div>
+          <div class="modalSub" id="revealSub">Continua ad aprire le località.</div>
+        </div>
+
+        <div class="modalActions">
+          <button class="btn" id="revealOk">OK, continua</button>
+        </div>
       </div>
-    </section>
-  </main>
-
-  <footer class="footer">
-    <span id="footerText">Grafica mantenuta • Offerta/Cambio a momenti scelti • Valore atteso rimosso</span>
-  </footer>
-</div>
-
-<!-- MODAL: SCEGLI IL TUO PACCO (obbligatorio) -->
-<div class="modal" id="pickModal" hidden>
-  <div class="modalCard" role="dialog" aria-modal="true" aria-labelledby="pickTitle">
-    <div class="modalTop">
-      <div class="modalBadge" id="pickTitle">SCEGLI IL TUO PACCO</div>
-      <button class="modalClose" id="pickClose" aria-label="Chiudi">✕</button>
     </div>
 
-    <div class="modalBody">
-      <div class="modalIcon" aria-hidden="true">📦</div>
-      <div class="modalPlace">Scegli una località come tuo pacco personale.</div>
-      <div class="modalSub">Clicca una località per iniziare.</div>
+    <!-- MODAL: OFFERTA (obbligatorio) -->
+    <div class="modal" id="offerModal" hidden>
+      <div class="modalCard" role="dialog" aria-modal="true" aria-labelledby="offerTitle">
+        <div class="modalTop">
+          <div class="modalBadge" id="offerTitle">OFFERTA DEL BANCO</div>
+          <button class="modalClose" id="offerClose" aria-label="Chiudi">✕</button>
+        </div>
 
-      <div class="swapGrid" id="pickGrid"></div>
+        <div class="modalBody">
+          <div class="modalIcon" aria-hidden="true">💼</div>
+          <div class="modalPlace">Il Banco ti offre:</div>
+          <div class="modalPrize" id="offerModalValue">—</div>
+          <div class="modalSub" id="offerModalSub">Devi scegliere: accetta o rifiuta.</div>
+        </div>
+
+        <div class="modalActions two">
+          <button class="btn" id="offerAccept">ACCETTA L'OFFERTA</button>
+          <button class="btn" id="offerReject">RIFIUTA L'OFFERTA</button>
+        </div>
+      </div>
     </div>
 
-    <div class="modalActions">
-      <button class="btn secondary" id="pickRandom">Scelta casuale</button>
-    </div>
-  </div>
-</div>
+    <!-- MODAL: CAMBIO PACCO (obbligatorio) -->
+    <div class="modal" id="swapModal" hidden>
+      <div class="modalCard" role="dialog" aria-modal="true" aria-labelledby="swapTitle">
+        <div class="modalTop">
+          <div class="modalBadge" id="swapTitle">CAMBIO PACCO</div>
+          <button class="modalClose" id="swapClose" aria-label="Chiudi">✕</button>
+        </div>
 
-<!-- MODAL: PREMIO USCITO -->
-<div class="modal" id="revealModal" hidden>
-  <div class="modalCard" role="dialog" aria-modal="true" aria-labelledby="revealTitle">
-    <div class="modalTop">
-      <div class="modalBadge" id="revealTitle">PREMIO USCITO</div>
-      <button class="modalClose" id="revealClose" aria-label="Chiudi">✕</button>
-    </div>
+        <div class="modalBody">
+          <div class="modalIcon" aria-hidden="true">🔁</div>
+          <div class="modalPlace" id="swapMyCase">Il tuo pacco: —</div>
+          <div class="modalSub" id="swapSub">
+            Scegli un pacco con cui scambiare, oppure continua senza cambiare.
+          </div>
+          <div class="swapGrid" id="swapGrid"></div>
+        </div>
 
-    <div class="modalBody">
-      <div class="modalIcon" aria-hidden="true">🎁</div>
-      <div class="modalPlace" id="revealPlace">—</div>
-      <div class="modalPrize" id="revealPrize">—</div>
-      <div class="modalSub" id="revealSub">Continua ad aprire le località.</div>
-    </div>
-
-    <div class="modalActions">
-      <button class="btn" id="revealOk">OK, continua</button>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL: OFFERTA (obbligatorio) -->
-<div class="modal" id="offerModal" hidden>
-  <div class="modalCard" role="dialog" aria-modal="true" aria-labelledby="offerTitle">
-    <div class="modalTop">
-      <div class="modalBadge" id="offerTitle">OFFERTA DEL BANCO</div>
-      <button class="modalClose" id="offerClose" aria-label="Chiudi">✕</button>
+        <div class="modalActions">
+          <button class="btn secondary" id="swapSkip">Continua senza cambiare</button>
+        </div>
+      </div>
     </div>
 
-    <div class="modalBody">
-      <div class="modalIcon" aria-hidden="true">💼</div>
-      <div class="modalPlace">Il Banco ti offre:</div>
-      <div class="modalPrize" id="offerModalValue">—</div>
-      <div class="modalSub" id="offerModalSub">Devi scegliere: accetta o rifiuta.</div>
+    <!-- Controlli ZOOM (mobile/webview) -->
+    <div class="zoomControls" id="zoomControls" aria-label="Zoom pagina">
+      <button class="zoomBtn" id="zoomOut" type="button" aria-label="Riduci zoom">−</button>
+      <div class="zoomPct" id="zoomPct">100%</div>
+      <button class="zoomBtn" id="zoomIn" type="button" aria-label="Aumenta zoom">+</button>
+      <button class="zoomBtn reset" id="zoomReset" type="button" aria-label="Reset zoom">↺</button>
     </div>
 
-    <div class="modalActions two">
-      <button class="btn" id="offerAccept">ACCETTA L'OFFERTA</button>
-      <button class="btn" id="offerReject">RIFIUTA L'OFFERTA</button>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL: CAMBIO PACCO (obbligatorio) -->
-<div class="modal" id="swapModal" hidden>
-  <div class="modalCard" role="dialog" aria-modal="true" aria-labelledby="swapTitle">
-    <div class="modalTop">
-      <div class="modalBadge" id="swapTitle">CAMBIO PACCO</div>
-      <button class="modalClose" id="swapClose" aria-label="Chiudi">✕</button>
-    </div>
-
-    <div class="modalBody">
-      <div class="modalIcon" aria-hidden="true">🔁</div>
-      <div class="modalPlace" id="swapMyCase">Il tuo pacco: —</div>
-      <div class="modalSub" id="swapSub">Scegli un pacco con cui scambiare, oppure continua senza cambiare.</div>
-      <div class="swapGrid" id="swapGrid"></div>
-    </div>
-
-    <div class="modalActions">
-      <button class="btn secondary" id="swapSkip">Continua senza cambiare</button>
-    </div>
-  </div>
-</div>
+    <!-- Firebase PRIMA del tuo script -->
     <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
-<script src="script.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore-compat.js"></script>
 
+    <!-- Il tuo script UNA sola volta -->
+    <script src="script.js"></script>
   </body>
-  
 </html>
