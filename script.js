@@ -38,15 +38,50 @@ document.addEventListener("DOMContentLoaded", () => {
   let state = null;
   const $ = (id) => document.getElementById(id);
 
-  /* ✅ Desktop fisso (1200px) + scala automatica su schermi piccoli */
+  // ✅ Desktop fisso (1200px) + scala automatica + zoom manuale (+ / -)
+  let userZoom = Number(localStorage.getItem("userZoom") || "1");
+
+  function clamp(n, min, max){ return Math.max(min, Math.min(max, n)); }
+
   function applyAutoScale(){
     const baseWidth = 1200;
+
     const w = Math.min(window.innerWidth, window.screen?.width || window.innerWidth);
-    const scale = Math.min(1, w / baseWidth);
-    document.documentElement.style.setProperty("--ui-scale", String(scale));
+    const baseScale = w / baseWidth;
+
+    // scala finale = scala automatica * zoom utente
+    const finalScale = clamp(baseScale * userZoom, 0.55, 1.5);
+
+    document.documentElement.style.setProperty("--ui-scale", String(finalScale));
+
+    const pctEl = document.getElementById("zoomPct");
+    if(pctEl) pctEl.textContent = `${Math.round(userZoom * 100)}%`;
   }
+
   window.addEventListener("resize", applyAutoScale, { passive: true });
   window.addEventListener("orientationchange", applyAutoScale, { passive: true });
+
+  document.addEventListener("click", (e) => {
+    const t = e.target;
+    if(!(t instanceof HTMLElement)) return;
+
+    if(t.id === "zoomIn"){
+      userZoom = clamp(userZoom + 0.1, 0.6, 2);
+      localStorage.setItem("userZoom", String(userZoom));
+      applyAutoScale();
+    }
+    if(t.id === "zoomOut"){
+      userZoom = clamp(userZoom - 0.1, 0.6, 2);
+      localStorage.setItem("userZoom", String(userZoom));
+      applyAutoScale();
+    }
+    if(t.id === "zoomReset"){
+      userZoom = 1;
+      localStorage.setItem("userZoom", String(userZoom));
+      applyAutoScale();
+    }
+  });
+
   applyAutoScale();
 
   const ui = {
