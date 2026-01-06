@@ -10,8 +10,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     casesCount: 20,
 
-    // ✅ COOLDOWN: 40 secondi tra un pacco e l'altro
-    caseCooldownMs: 40000,
+    // ✅ COOLDOWN: 10secondi tra un pacco e l'altro
+    caseCooldownMs: 10000,
 
     caseNames: [
       "Girilonga","Coroddis","Su tauli","Corosa","Gennaguara",
